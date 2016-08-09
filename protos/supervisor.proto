@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package protos;
+
+// farmer state
+enum FarmerState {
+    OFFLINE = 0;
+    ONLINE = 1;
+    LOST = 2;
+}
+
+message FarmerAccount {
+    string farmerID = 1;
+    uint32 balance = 2;
+    FarmerState state = 3;
+    uint64 lastModifiedTime = 4;
+    uint64 lastConquerTime = 5;
+}
