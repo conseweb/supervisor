@@ -22,3 +22,7 @@ type Tree interface {
 	Keys() []string
 	Len() int
 }
+
+func NewTree() Tree {
+	return NewTrie()
+}
