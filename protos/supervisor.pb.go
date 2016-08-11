@@ -50,8 +50,8 @@ type FarmerAccount struct {
 	FarmerID         string      `protobuf:"bytes,1,opt,name=farmerID" json:"farmerID,omitempty"`
 	Balance          uint32      `protobuf:"varint,2,opt,name=balance" json:"balance,omitempty"`
 	State            FarmerState `protobuf:"varint,3,opt,name=state,enum=protos.FarmerState" json:"state,omitempty"`
-	LastModifiedTime uint64      `protobuf:"varint,4,opt,name=lastModifiedTime" json:"lastModifiedTime,omitempty"`
-	LastConquerTime  uint64      `protobuf:"varint,5,opt,name=lastConquerTime" json:"lastConquerTime,omitempty"`
+	LastModifiedTime int64       `protobuf:"varint,4,opt,name=lastModifiedTime" json:"lastModifiedTime,omitempty"`
+	LastConquerTime  int64       `protobuf:"varint,5,opt,name=lastConquerTime" json:"lastConquerTime,omitempty"`
 }
 
 func (m *FarmerAccount) Reset()         { *m = FarmerAccount{} }
