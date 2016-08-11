@@ -25,6 +25,7 @@ type Storage interface {
 	Get([]byte) ([]byte, error)
 	Set([]byte, []byte) error
 	Del([]byte) error
+	Close() error
 }
 
 func NewStore(backend string, args ...interface{}) (storage Storage, err error) {

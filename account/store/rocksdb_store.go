@@ -16,6 +16,7 @@ limitations under the License.
 package store
 
 import (
+	"errors"
 	"github.com/tecbot/gorocksdb"
 	"os"
 	"path"
@@ -56,6 +57,11 @@ func NewRocksdbStorage(dbpath string) (*RocksdbStorage, error) {
 		return nil, err
 	}
 
+	//db, err := gorocksdb.OpenDb(opts, "default")
+	//if err != nil {
+	//	return nil, err
+	//}
+
 	return &RocksdbStorage{
 		db:         db,
 		defaultCFH: cfHandlers[0],
@@ -72,11 +78,20 @@ func (this *RocksdbStorage) Get(key []byte) ([]byte, error) {
 	}
 	defer slice.Free()
 
-	if slice.Data() == nil {
-		return nil, nil
+	if slice.Data() == nil || len(slice.Data()) == 0 {
+		return nil, errors.New("no data found")
 	}
 
 	data := makeCopy(slice.Data())
+
+	//data, err := this.db.GetBytes(opt, key)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//if data == nil || len(data) == 0 {
+	//	return nil, errors.New("no data found")
+	//}
+
 	return data, nil
 }
 
@@ -85,6 +100,7 @@ func (this *RocksdbStorage) Set(key []byte, value []byte) error {
 	defer opt.Destroy()
 
 	return this.db.PutCF(opt, this.defaultCFH, key, value)
+	//return this.db.Put(opt, key, value)
 }
 
 func (this *RocksdbStorage) Del(key []byte) error {
@@ -92,9 +108,12 @@ func (this *RocksdbStorage) Del(key []byte) error {
 	defer opt.Destroy()
 
 	return this.db.DeleteCF(opt, this.defaultCFH, key)
+	//return this.db.Delete(opt, key)
 }
 
-func (this *RocksdbStorage) Close() {
+func (this *RocksdbStorage) Close() error {
 	this.defaultCFH.Destroy()
 	this.db.Close()
+
+	return nil
 }

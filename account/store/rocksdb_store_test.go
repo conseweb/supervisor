@@ -49,6 +49,8 @@ func (t *RocksdbStorageTest) TestRocksdbStorage_Set_Get(c *check.C) {
 	get, err := t.storage.Get([]byte("abc"))
 	c.Assert(err, check.IsNil)
 	c.Assert(string(get), check.Equals, "abc")
+	get, err = t.storage.Get([]byte("adb"))
+	c.Assert(err, check.NotNil)
 }
 
 func (t *RocksdbStorageTest) TestRocksdbStorage_Del(c *check.C) {
