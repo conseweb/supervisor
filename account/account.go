@@ -16,15 +16,16 @@ limitations under the License.
 package account
 
 import (
+	"sync"
+	"time"
+
 	"github.com/conseweb/supervisor/account/store"
 	"github.com/conseweb/supervisor/account/tree"
 	pb "github.com/conseweb/supervisor/protos"
+	"github.com/golang/protobuf/proto"
 	"github.com/looplab/fsm"
 	"github.com/op/go-logging"
 	"github.com/spf13/viper"
-	"sync"
-	"time"
-	"github.com/golang/protobuf/proto"
 )
 
 const (
@@ -210,7 +211,7 @@ func (this *FarmerAccountHandler) OnLine() (*pb.FarmerAccount, error) {
 }
 
 func (this *FarmerAccountHandler) Ping() {
-	
+
 }
 
 func (this *FarmerAccountHandler) beforeEvent(e *fsm.Event) {

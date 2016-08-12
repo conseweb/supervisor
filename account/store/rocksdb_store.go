@@ -17,9 +17,10 @@ package store
 
 import (
 	"errors"
-	"github.com/tecbot/gorocksdb"
 	"os"
 	"path"
+
+	"github.com/tecbot/gorocksdb"
 )
 
 type RocksdbStorage struct {
