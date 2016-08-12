@@ -16,15 +16,17 @@ limitations under the License.
 package account
 
 import (
+	"errors"
 	"github.com/conseweb/supervisor/account/store"
 	"github.com/conseweb/supervisor/account/tree"
 	pb "github.com/conseweb/supervisor/protos"
+	"github.com/golang/protobuf/proto"
 	"github.com/looplab/fsm"
 	"github.com/op/go-logging"
 	"github.com/spf13/viper"
+	"math/rand"
 	"sync"
 	"time"
-	"github.com/golang/protobuf/proto"
 )
 
 const (
@@ -102,6 +104,7 @@ type FarmerAccountController struct {
 // just stands for there is a farmer want to connect 2 supervisor
 func (this *FarmerAccountController) NewFarmerHandler(farmerId string) (handler *FarmerAccountHandler) {
 	key := farmerId2Key(farmerId)
+	handler = &FarmerAccountHandler{}
 
 	// 1. looking farmer from account tree
 	{
@@ -115,8 +118,10 @@ func (this *FarmerAccountController) NewFarmerHandler(farmerId string) (handler 
 			this.l.RUnlock()
 
 			if ok {
-				handler = newFarmerAccountHandler(bytes2FarmerAccount(farmerBytes), fsm)
-				return
+				if handler.unmarshal(farmerBytes) == nil {
+					handler.fsm = fsm
+					return
+				}
 			}
 		}
 	}
@@ -135,11 +140,19 @@ func (this *FarmerAccountController) NewFarmerHandler(farmerId string) (handler 
 		"after_event": func(e *fsm.Event) {
 			handler.afterEvent(e)
 
-			farmerBytes := farmerAccount2Bytes(handler.account)
-			// save back 2 memory
-			this.accountTree.Put(key, farmerBytes)
-			// save back 2 storage, async
-			go this.accountStorage.Set([]byte(key), farmerBytes)
+			this.l.Lock()
+			if farmerBytes, err := handler.marshal(); err == nil {
+				// save back 2 memory
+				if handler.account.State != pb.FarmerState_OFFLINE {
+					this.accountTree.Put(key, farmerBytes)
+				} else {
+					this.accountTree.Delete(key)
+				}
+
+				// save back 2 storage, async
+				go this.accountStorage.Set([]byte(key), farmerBytes)
+			}
+			this.l.Unlock()
 		},
 	})
 
@@ -150,11 +163,14 @@ func (this *FarmerAccountController) NewFarmerHandler(farmerId string) (handler 
 		this.l.RUnlock()
 		if err == nil {
 			this.l.Lock()
-			handler = newFarmerAccountHandler(bytes2FarmerAccount(farmerBytes), tmpFsm)
-			// put into account tree
-			this.accountTree.Put(key, farmerBytes)
-			// put handler'fsm into fsm's map
-			this.farmerFSMs[key] = handler.fsm
+			if handler.unmarshal(farmerBytes) == nil {
+				handler.fsm = tmpFsm
+
+				// put into account tree
+				this.accountTree.Put(key, farmerBytes)
+				// put handler'fsm into fsm's map
+				this.farmerFSMs[key] = handler.fsm
+			}
 			this.l.Unlock()
 
 			return
@@ -171,15 +187,17 @@ func (this *FarmerAccountController) NewFarmerHandler(farmerId string) (handler 
 			LastModifiedTime: time.Now().UnixNano(),
 		}
 
-		farmerBytes := farmerAccount2Bytes(farmerAccount)
-		handler = newFarmerAccountHandler(farmerAccount, tmpFsm)
-		// put into account tree
-		this.accountTree.Put(key, farmerBytes)
-		// put into account storage, async
-		go this.accountStorage.Set([]byte(key), farmerBytes)
+		handler.account = farmerAccount
+		handler.fsm = tmpFsm
+		if farmerBytes, err := handler.marshal(); err == nil {
+			// put into account tree
+			this.accountTree.Put(key, farmerBytes)
+			// put into account storage, async
+			go this.accountStorage.Set([]byte(key), farmerBytes)
 
-		// put handler'fsm into fsm's map
-		this.farmerFSMs[key] = handler.fsm
+			// put handler'fsm into fsm's map
+			this.farmerFSMs[key] = handler.fsm
+		}
 		this.l.Unlock()
 
 		return
@@ -194,50 +212,107 @@ func (this *FarmerAccountController) Close() error {
 }
 
 type FarmerAccountHandler struct {
-	account   *pb.FarmerAccount
-	fsm       *fsm.FSM
-	lostCount uint8
+	account      *pb.FarmerAccount
+	fsm          *fsm.FSM
+	lostCount    int
+	nextPingTime int64
 }
 
-func (this *FarmerAccountHandler) OnLine() (*pb.FarmerAccount, error) {
-	if err := this.fsm.Event("online"); err != nil {
-		logger.Errorf("farmer online return err: %v", err)
-		return nil, err
+// whether or not need challenge blocks hash
+func (this *FarmerAccountHandler) NeedChallengeBlocks(highBlockNumber, lowBlockBumber uint64) (need bool, brange *pb.BlocksRange) {
+	need = (rand.Int() % 2) == 0
+	if need {
+		if highBlockNumber < lowBlockBumber {
+			return
+		}
+
+		brange.HighBlockNumber = highBlockNumber - uint64(rand.Int63n(int64(highBlockNumber-lowBlockBumber)))
+		brange.LowBlockNumber = lowBlockBumber + uint64(rand.Int63n(int64(brange.HighBlockNumber-lowBlockBumber)))
 	}
 
-	logger.Debug("alreay online")
-	return this.account, nil
+	return
 }
 
-func (this *FarmerAccountHandler) Ping() {
-	
+// randomly choose challenge hash type
+func (this *FarmerAccountHandler) ChallengeHashType() pb.HashType {
+	return pb.HashType(pb.FarmerState_value[pb.FarmerState_name[int32((rand.Int()%len(pb.FarmerState_value)))]])
+}
+
+// randomly return next ping time
+func (this *FarmerAccountHandler) NextPingTime() int64 {
+	return this.nextPingTime
+}
+
+func (this *FarmerAccountHandler) Account() *pb.FarmerAccount {
+	return this.account
+}
+
+func (this *FarmerAccountHandler) OnLine() error {
+	if err := this.fsm.Event("online"); err != nil {
+		logger.Errorf("farmer online return err: %v", err)
+		return err
+	}
+
+	return nil
+}
+
+func (this *FarmerAccountHandler) Ping() error {
+	if err := this.fsm.Event("ping"); err != nil {
+		logger.Errorf("farmer ping return err: %v", err)
+		return err
+	}
+
+	return nil
+}
+
+func (this *FarmerAccountHandler) Lost() error {
+	if this.lostCount <= 0 {
+		return errors.New("current lost count <= 0")
+	}
+
+	if err := this.fsm.Event("lost"); err != nil {
+		logger.Errorf("farmer lost return err: %v", err)
+		return err
+	}
+
+	return nil
+}
+
+func (this *FarmerAccountHandler) OffLine() error {
+	if err := this.fsm.Event("offline"); err != nil {
+		logger.Errorf("farmer offline return err: %v", err)
+		return err
+	}
+
+	return nil
 }
 
 func (this *FarmerAccountHandler) beforeEvent(e *fsm.Event) {
-	logger.Debugf("Farmer[%v] enter state %v from state %v", this.account.FarmerID, e.Dst, e.Src)
+	logger.Debugf("farmer(%v) do event(%v) from state %v enter state %v", this.account.FarmerID, e.Event, e.Src, e.Dst)
 }
 
 // after online, we set farmer's lost count 0
 func (this *FarmerAccountHandler) afterOnLine() {
+	npInterval := nextPingInterval()
 	this.lostCount = 0
-	logger.Debugf("i am in afterOnLine")
+	this.nextPingTime = time.Now().Add(npInterval).UnixNano()
+
+	time.AfterFunc(npInterval, func() {
+		this.lostCount++
+		if this.fsm.Can("lost") {
+			this.Lost()
+		}
+		if this.lostCount >= viper.GetInt("farmer.ping.lostcount") {
+			if this.fsm.Can("offline") {
+				this.OffLine()
+			}
+		}
+	})
 }
 
 func (this *FarmerAccountHandler) afterEvent(e *fsm.Event) {
 	this.account.LastModifiedTime = time.Now().UnixNano()
 	this.account.State = pb.FarmerState(pb.FarmerState_value[e.Dst])
-	logger.Debugf("i am in afterEvent")
-}
-
-func newFarmerAccountHandler(account *pb.FarmerAccount, fsm *fsm.FSM) *FarmerAccountHandler {
-	if account.FarmerID == "" {
-		return nil
-	}
-
-	return &FarmerAccountHandler{
-		account: account,
-		fsm:     fsm,
-	}
 }
 
 // TODO change farmerid 2 backend uniquekey
@@ -250,24 +325,43 @@ func farmerId2Key(farmerId string) string {
 
 // marshal farmer account 2 proto bytes
 // if there is an error, return nil
-func farmerAccount2Bytes(farmerObj *pb.FarmerAccount) []byte {
-	bytesInfo, err := proto.Marshal(farmerObj)
+func (this *FarmerAccountHandler) marshal() ([]byte, error) {
+	accountBytes, err := proto.Marshal(this.account)
 	if err != nil {
 		logger.Errorf("marshal farmer account err: %v", err)
-		return nil
+		return nil, err
 	}
 
-	return bytesInfo
+	return accountBytes, nil
 }
 
 // unmarshal proto bytes 2 farmer account
-// if there is an error, return nil
-func bytes2FarmerAccount(fBytes []byte) *pb.FarmerAccount {
-	farmerObj := &pb.FarmerAccount{}
-	if err := proto.Unmarshal(fBytes, farmerObj); err != nil {
+func (this *FarmerAccountHandler) unmarshal(fBytes []byte) error {
+	this.account = &pb.FarmerAccount{}
+	if err := proto.Unmarshal(fBytes, this.account); err != nil {
 		logger.Errorf("unmarshal farmer account err: %v", err)
-		return nil
+		return err
 	}
 
-	return farmerObj
+	return nil
+}
+
+func nextPingInterval() time.Duration {
+	basicInterval := viper.GetInt("farmer.ping.interval")
+	up := viper.GetInt("farmer.ping.up")
+	down := viper.GetInt("farmer.ping.down")
+
+	interval := basicInterval
+	upflag := (rand.Int() % 2) == 0
+	if upflag {
+		interval += rand.Intn(up)
+	} else {
+		interval -= rand.Intn(down)
+	}
+
+	if interval < 0 {
+		interval = basicInterval
+	}
+
+	return time.Duration(interval) * time.Second
 }

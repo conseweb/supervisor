@@ -12,6 +12,7 @@ It has these top-level messages:
 	FarmerAccount
 	FarmerOnLineReq
 	FarmerOnLineRsp
+	BlocksRange
 	FarmerPingReq
 	FarmerPingRsp
 	FarmerChallengeReq
@@ -109,7 +110,8 @@ func (m *FarmerOnLineReq) String() string { return proto.CompactTextString(m) }
 func (*FarmerOnLineReq) ProtoMessage()    {}
 
 type FarmerOnLineRsp struct {
-	Account *FarmerAccount `protobuf:"bytes,1,opt,name=account" json:"account,omitempty"`
+	Account  *FarmerAccount `protobuf:"bytes,1,opt,name=account" json:"account,omitempty"`
+	NextPing int64          `protobuf:"varint,2,opt,name=nextPing" json:"nextPing,omitempty"`
 }
 
 func (m *FarmerOnLineRsp) Reset()         { *m = FarmerOnLineRsp{} }
@@ -123,23 +125,37 @@ func (m *FarmerOnLineRsp) GetAccount() *FarmerAccount {
 	return nil
 }
 
+type BlocksRange struct {
+	HighBlockNumber uint64 `protobuf:"varint,1,opt,name=highBlockNumber" json:"highBlockNumber,omitempty"`
+	LowBlockNumber  uint64 `protobuf:"varint,2,opt,name=lowBlockNumber" json:"lowBlockNumber,omitempty"`
+}
+
+func (m *BlocksRange) Reset()         { *m = BlocksRange{} }
+func (m *BlocksRange) String() string { return proto.CompactTextString(m) }
+func (*BlocksRange) ProtoMessage()    {}
+
 type FarmerPingReq struct {
-	FarmerID  string `protobuf:"bytes,1,opt,name=farmerID" json:"farmerID,omitempty"`
-	HighBlock uint64 `protobuf:"varint,2,opt,name=highBlock" json:"highBlock,omitempty"`
-	LowBlock  uint64 `protobuf:"varint,3,opt,name=lowBlock" json:"lowBlock,omitempty"`
+	FarmerID    string       `protobuf:"bytes,1,opt,name=farmerID" json:"farmerID,omitempty"`
+	BlocksRange *BlocksRange `protobuf:"bytes,2,opt,name=blocksRange" json:"blocksRange,omitempty"`
 }
 
 func (m *FarmerPingReq) Reset()         { *m = FarmerPingReq{} }
 func (m *FarmerPingReq) String() string { return proto.CompactTextString(m) }
 func (*FarmerPingReq) ProtoMessage()    {}
 
+func (m *FarmerPingReq) GetBlocksRange() *BlocksRange {
+	if m != nil {
+		return m.BlocksRange
+	}
+	return nil
+}
+
 type FarmerPingRsp struct {
 	Account       *FarmerAccount `protobuf:"bytes,1,opt,name=account" json:"account,omitempty"`
 	NeedChallenge bool           `protobuf:"varint,2,opt,name=needChallenge" json:"needChallenge,omitempty"`
 	HashType      HashType       `protobuf:"varint,3,opt,name=hashType,enum=protos.HashType" json:"hashType,omitempty"`
-	HighBlock     uint64         `protobuf:"varint,4,opt,name=highBlock" json:"highBlock,omitempty"`
-	LowBlock      uint64         `protobuf:"varint,5,opt,name=lowBlock" json:"lowBlock,omitempty"`
-	NextPing      int64          `protobuf:"varint,6,opt,name=nextPing" json:"nextPing,omitempty"`
+	BlocksRange   *BlocksRange   `protobuf:"bytes,4,opt,name=blocksRange" json:"blocksRange,omitempty"`
+	NextPing      int64          `protobuf:"varint,5,opt,name=nextPing" json:"nextPing,omitempty"`
 }
 
 func (m *FarmerPingRsp) Reset()         { *m = FarmerPingRsp{} }
@@ -153,17 +169,30 @@ func (m *FarmerPingRsp) GetAccount() *FarmerAccount {
 	return nil
 }
 
+func (m *FarmerPingRsp) GetBlocksRange() *BlocksRange {
+	if m != nil {
+		return m.BlocksRange
+	}
+	return nil
+}
+
 type FarmerChallengeReq struct {
-	FarmerID   string   `protobuf:"bytes,1,opt,name=farmerID" json:"farmerID,omitempty"`
-	BlocksHash []byte   `protobuf:"bytes,2,opt,name=blocksHash,proto3" json:"blocksHash,omitempty"`
-	HashType   HashType `protobuf:"varint,3,opt,name=hashType,enum=protos.HashType" json:"hashType,omitempty"`
-	HighBlock  uint64   `protobuf:"varint,4,opt,name=highBlock" json:"highBlock,omitempty"`
-	LowBlock   uint64   `protobuf:"varint,5,opt,name=lowBlock" json:"lowBlock,omitempty"`
+	FarmerID    string       `protobuf:"bytes,1,opt,name=farmerID" json:"farmerID,omitempty"`
+	BlocksHash  []byte       `protobuf:"bytes,2,opt,name=blocksHash,proto3" json:"blocksHash,omitempty"`
+	HashType    HashType     `protobuf:"varint,3,opt,name=hashType,enum=protos.HashType" json:"hashType,omitempty"`
+	BlocksRange *BlocksRange `protobuf:"bytes,4,opt,name=blocksRange" json:"blocksRange,omitempty"`
 }
 
 func (m *FarmerChallengeReq) Reset()         { *m = FarmerChallengeReq{} }
 func (m *FarmerChallengeReq) String() string { return proto.CompactTextString(m) }
 func (*FarmerChallengeReq) ProtoMessage()    {}
+
+func (m *FarmerChallengeReq) GetBlocksRange() *BlocksRange {
+	if m != nil {
+		return m.BlocksRange
+	}
+	return nil
+}
 
 type FarmerChallengeRsp struct {
 	Account *FarmerAccount `protobuf:"bytes,1,opt,name=account" json:"account,omitempty"`

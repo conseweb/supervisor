@@ -44,12 +44,17 @@ message FarmerOnLineReq {
 
 message FarmerOnLineRsp {
     FarmerAccount account = 1;
+    int64 nextPing = 2;
+}
+
+message BlocksRange {
+    uint64 highBlockNumber = 1;
+    uint64 lowBlockNumber = 2;
 }
 
 message FarmerPingReq {
     string farmerID = 1;
-    uint64 highBlock = 2;
-    uint64 lowBlock = 3;
+    BlocksRange blocksRange = 2;
 }
 
 enum HashType {
@@ -62,17 +67,15 @@ message FarmerPingRsp {
     FarmerAccount account = 1;
     bool needChallenge = 2;
     HashType hashType = 3;
-    uint64 highBlock = 4;
-    uint64 lowBlock = 5;
-    int64 nextPing = 6;
+    BlocksRange blocksRange = 4;
+    int64 nextPing = 5;
 }
 
 message FarmerChallengeReq {
     string farmerID = 1;
     bytes blocksHash = 2;
     HashType hashType = 3;
-    uint64 highBlock = 4;
-    uint64 lowBlock = 5;
+    BlocksRange blocksRange = 4;
 }
 
 message FarmerChallengeRsp {

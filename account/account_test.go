@@ -37,6 +37,10 @@ var _ = check.Suite(&TestFarmerAccount{})
 func (this *TestFarmerAccount) SetUpSuite(c *check.C) {
 	viper.Set("account.store.backend", "rocksdb")
 	viper.Set("account.store.rocksdb.dbpath", filepath.Join(os.TempDir(), "testAccount"))
+	viper.Set("farmer.ping.interval", 900)
+	viper.Set("farmer.ping.up", 900)
+	viper.Set("farmer.ping.down", 800)
+	viper.Set("farmer.ping.lostcount", 2)
 }
 
 func (this *TestFarmerAccount) TearDownSuite(c *check.C) {
@@ -47,40 +51,29 @@ func (this *TestFarmerAccount) TearDownSuite(c *check.C) {
 
 func (this *TestFarmerAccount) TestOnLine(c *check.C) {
 	handler := NewFarmerHandler("farmerId0001")
-	account, err := handler.OnLine()
-	c.Check(err, check.IsNil)
-	c.Check(account, check.NotNil)
-	c.Assert(account.FarmerID, check.DeepEquals, "farmerId0001")
+	c.Check(handler.OnLine(), check.IsNil)
+	c.Assert(handler.Account().State, check.Equals, pb.FarmerState_ONLINE)
 }
 
-func (this *TestFarmerAccount) TestFarmerMarshalUnmarshal(c *check.C) {
-	farmer := &pb.FarmerAccount{
-		FarmerID: "1234567",
-		Balance:  100,
-	}
+func (this *TestFarmerAccount) TestLost(c *check.C) {
+	handler := NewFarmerHandler("farmerId0002")
+	c.Check(handler.OnLine(), check.IsNil)
+	c.Assert(handler.Account().State, check.Equals, pb.FarmerState_ONLINE)
 
-	farmerBytes := farmerAccount2Bytes(farmer)
-	tmpFarmer := bytes2FarmerAccount(farmerBytes)
-
-	c.Assert(tmpFarmer.FarmerID, check.Equals, farmer.FarmerID)
-	c.Assert(tmpFarmer.Balance, check.Equals, farmer.Balance)
+	handler.lostCount++
+	c.Check(handler.Lost(), check.IsNil)
+	c.Assert(handler.Account().State, check.Equals, pb.FarmerState_LOST)
 }
 
-func (this *TestFarmerAccount) BenchmarkFarmerMarshal(c *check.C) {
-	for i := 0; i < c.N; i++ {
-		farmerAccount2Bytes(&pb.FarmerAccount{
-			FarmerID: "1234567",
-			Balance:  100,
-		})
-	}
-}
+func (this *TestFarmerAccount) TestOffLine(c *check.C) {
+	handler := NewFarmerHandler("farmerId0003")
+	c.Check(handler.OnLine(), check.IsNil)
+	c.Assert(handler.Account().State, check.Equals, pb.FarmerState_ONLINE)
 
-func (this *TestFarmerAccount) BenchmarkFarmerUnmarshal(c *check.C) {
-	fBytes := farmerAccount2Bytes(&pb.FarmerAccount{
-		FarmerID: "1234567",
-		Balance:  100,
-	})
-	for i := 0; i < c.N; i++ {
-		bytes2FarmerAccount(fBytes)
-	}
+	handler.lostCount++
+	c.Check(handler.Lost(), check.IsNil)
+	c.Assert(handler.Account().State, check.Equals, pb.FarmerState_LOST)
+
+	c.Check(handler.OffLine(), check.IsNil)
+	c.Assert(handler.Account().State, check.Equals, pb.FarmerState_OFFLINE)
 }
