@@ -16,13 +16,14 @@ limitations under the License.
 package account
 
 import (
-	pb "github.com/conseweb/supervisor/protos"
-	"github.com/spf13/viper"
-	"gopkg.in/check.v1"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
+
+	pb "github.com/conseweb/supervisor/protos"
+	"github.com/spf13/viper"
+	"gopkg.in/check.v1"
 )
 
 func TestAccount(t *testing.T) {
