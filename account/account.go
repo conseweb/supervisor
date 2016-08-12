@@ -135,11 +135,11 @@ func (this *FarmerAccountController) NewFarmerHandler(farmerId string) (handler 
 		"after_event": func(e *fsm.Event) {
 			handler.afterEvent(e)
 
-			//farmerBytes := farmerAccount2Bytes(handler.account)
-			//// save back 2 memory
-			//this.accountTree.Put(key, farmerBytes)
-			//// save back 2 storage, async
-			//go this.accountStorage.Set([]byte(key), farmerBytes)
+			farmerBytes := farmerAccount2Bytes(handler.account)
+			// save back 2 memory
+			this.accountTree.Put(key, farmerBytes)
+			// save back 2 storage, async
+			go this.accountStorage.Set([]byte(key), farmerBytes)
 		},
 	})
 
@@ -207,6 +207,10 @@ func (this *FarmerAccountHandler) OnLine() (*pb.FarmerAccount, error) {
 
 	logger.Debug("alreay online")
 	return this.account, nil
+}
+
+func (this *FarmerAccountHandler) Ping() {
+	
 }
 
 func (this *FarmerAccountHandler) beforeEvent(e *fsm.Event) {

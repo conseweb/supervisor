@@ -22,6 +22,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 func TestAccount(t *testing.T) {
@@ -39,6 +40,7 @@ func (this *TestFarmerAccount) SetUpSuite(c *check.C) {
 }
 
 func (this *TestFarmerAccount) TearDownSuite(c *check.C) {
+	time.Sleep(time.Second)
 	Close()
 	os.Remove(filepath.Join(os.TempDir(), "testAccount"))
 }
