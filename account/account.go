@@ -235,7 +235,7 @@ func (this *FarmerAccountHandler) NeedChallengeBlocks(highBlockNumber, lowBlockB
 
 // randomly choose challenge hash type
 func (this *FarmerAccountHandler) ChallengeHashType() pb.HashType {
-	return pb.HashType(pb.FarmerState_value[pb.FarmerState_name[int32((rand.Int()%len(pb.FarmerState_value)))]])
+	return pb.HashType(pb.HashType_value[pb.HashType_name[int32((rand.Int()%len(pb.HashType_value)))]])
 }
 
 // randomly return next ping time
