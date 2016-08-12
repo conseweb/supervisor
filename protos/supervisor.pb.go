@@ -12,6 +12,7 @@ It has these top-level messages:
 	FarmerAccount
 	FarmerOnLineReq
 	FarmerOnLineRsp
+	BlocksRange
 	FarmerPingReq
 	FarmerPingRsp
 	FarmerChallengeReq
@@ -62,20 +63,41 @@ func (x FarmerState) String() string {
 type HashType int32
 
 const (
-	HashType_SHA256 HashType = 0
-	HashType_SHA1   HashType = 1
-	HashType_SHA3   HashType = 2
+	HashType_MD5     HashType = 0
+	HashType_SHA1    HashType = 1
+	HashType_SHA224  HashType = 2
+	HashType_SHA256  HashType = 3
+	HashType_SHA384  HashType = 4
+	HashType_SHA512  HashType = 5
+	HashType_SHA3224 HashType = 6
+	HashType_SHA3256 HashType = 7
+	HashType_SHA3384 HashType = 8
+	HashType_SHA3512 HashType = 9
 )
 
 var HashType_name = map[int32]string{
-	0: "SHA256",
+	0: "MD5",
 	1: "SHA1",
-	2: "SHA3",
+	2: "SHA224",
+	3: "SHA256",
+	4: "SHA384",
+	5: "SHA512",
+	6: "SHA3224",
+	7: "SHA3256",
+	8: "SHA3384",
+	9: "SHA3512",
 }
 var HashType_value = map[string]int32{
-	"SHA256": 0,
-	"SHA1":   1,
-	"SHA3":   2,
+	"MD5":     0,
+	"SHA1":    1,
+	"SHA224":  2,
+	"SHA256":  3,
+	"SHA384":  4,
+	"SHA512":  5,
+	"SHA3224": 6,
+	"SHA3256": 7,
+	"SHA3384": 8,
+	"SHA3512": 9,
 }
 
 func (x HashType) String() string {
@@ -109,7 +131,8 @@ func (m *FarmerOnLineReq) String() string { return proto.CompactTextString(m) }
 func (*FarmerOnLineReq) ProtoMessage()    {}
 
 type FarmerOnLineRsp struct {
-	Account *FarmerAccount `protobuf:"bytes,1,opt,name=account" json:"account,omitempty"`
+	Account  *FarmerAccount `protobuf:"bytes,1,opt,name=account" json:"account,omitempty"`
+	NextPing int64          `protobuf:"varint,2,opt,name=nextPing" json:"nextPing,omitempty"`
 }
 
 func (m *FarmerOnLineRsp) Reset()         { *m = FarmerOnLineRsp{} }
@@ -123,23 +146,37 @@ func (m *FarmerOnLineRsp) GetAccount() *FarmerAccount {
 	return nil
 }
 
+type BlocksRange struct {
+	HighBlockNumber uint64 `protobuf:"varint,1,opt,name=highBlockNumber" json:"highBlockNumber,omitempty"`
+	LowBlockNumber  uint64 `protobuf:"varint,2,opt,name=lowBlockNumber" json:"lowBlockNumber,omitempty"`
+}
+
+func (m *BlocksRange) Reset()         { *m = BlocksRange{} }
+func (m *BlocksRange) String() string { return proto.CompactTextString(m) }
+func (*BlocksRange) ProtoMessage()    {}
+
 type FarmerPingReq struct {
-	FarmerID  string `protobuf:"bytes,1,opt,name=farmerID" json:"farmerID,omitempty"`
-	HighBlock uint64 `protobuf:"varint,2,opt,name=highBlock" json:"highBlock,omitempty"`
-	LowBlock  uint64 `protobuf:"varint,3,opt,name=lowBlock" json:"lowBlock,omitempty"`
+	FarmerID    string       `protobuf:"bytes,1,opt,name=farmerID" json:"farmerID,omitempty"`
+	BlocksRange *BlocksRange `protobuf:"bytes,2,opt,name=blocksRange" json:"blocksRange,omitempty"`
 }
 
 func (m *FarmerPingReq) Reset()         { *m = FarmerPingReq{} }
 func (m *FarmerPingReq) String() string { return proto.CompactTextString(m) }
 func (*FarmerPingReq) ProtoMessage()    {}
 
+func (m *FarmerPingReq) GetBlocksRange() *BlocksRange {
+	if m != nil {
+		return m.BlocksRange
+	}
+	return nil
+}
+
 type FarmerPingRsp struct {
 	Account       *FarmerAccount `protobuf:"bytes,1,opt,name=account" json:"account,omitempty"`
 	NeedChallenge bool           `protobuf:"varint,2,opt,name=needChallenge" json:"needChallenge,omitempty"`
 	HashType      HashType       `protobuf:"varint,3,opt,name=hashType,enum=protos.HashType" json:"hashType,omitempty"`
-	HighBlock     uint64         `protobuf:"varint,4,opt,name=highBlock" json:"highBlock,omitempty"`
-	LowBlock      uint64         `protobuf:"varint,5,opt,name=lowBlock" json:"lowBlock,omitempty"`
-	NextPing      int64          `protobuf:"varint,6,opt,name=nextPing" json:"nextPing,omitempty"`
+	BlocksRange   *BlocksRange   `protobuf:"bytes,4,opt,name=blocksRange" json:"blocksRange,omitempty"`
+	NextPing      int64          `protobuf:"varint,5,opt,name=nextPing" json:"nextPing,omitempty"`
 }
 
 func (m *FarmerPingRsp) Reset()         { *m = FarmerPingRsp{} }
@@ -153,17 +190,30 @@ func (m *FarmerPingRsp) GetAccount() *FarmerAccount {
 	return nil
 }
 
+func (m *FarmerPingRsp) GetBlocksRange() *BlocksRange {
+	if m != nil {
+		return m.BlocksRange
+	}
+	return nil
+}
+
 type FarmerChallengeReq struct {
-	FarmerID   string   `protobuf:"bytes,1,opt,name=farmerID" json:"farmerID,omitempty"`
-	BlocksHash []byte   `protobuf:"bytes,2,opt,name=blocksHash,proto3" json:"blocksHash,omitempty"`
-	HashType   HashType `protobuf:"varint,3,opt,name=hashType,enum=protos.HashType" json:"hashType,omitempty"`
-	HighBlock  uint64   `protobuf:"varint,4,opt,name=highBlock" json:"highBlock,omitempty"`
-	LowBlock   uint64   `protobuf:"varint,5,opt,name=lowBlock" json:"lowBlock,omitempty"`
+	FarmerID    string       `protobuf:"bytes,1,opt,name=farmerID" json:"farmerID,omitempty"`
+	BlocksHash  []byte       `protobuf:"bytes,2,opt,name=blocksHash,proto3" json:"blocksHash,omitempty"`
+	HashType    HashType     `protobuf:"varint,3,opt,name=hashType,enum=protos.HashType" json:"hashType,omitempty"`
+	BlocksRange *BlocksRange `protobuf:"bytes,4,opt,name=blocksRange" json:"blocksRange,omitempty"`
 }
 
 func (m *FarmerChallengeReq) Reset()         { *m = FarmerChallengeReq{} }
 func (m *FarmerChallengeReq) String() string { return proto.CompactTextString(m) }
 func (*FarmerChallengeReq) ProtoMessage()    {}
+
+func (m *FarmerChallengeReq) GetBlocksRange() *BlocksRange {
+	if m != nil {
+		return m.BlocksRange
+	}
+	return nil
+}
 
 type FarmerChallengeRsp struct {
 	Account *FarmerAccount `protobuf:"bytes,1,opt,name=account" json:"account,omitempty"`
@@ -222,7 +272,7 @@ type FarmerPublicClient interface {
 	// after FarmerPing, if need challenge, carry with blocks hash, if success, more balance(token) add
 	FarmerChallenge(ctx context.Context, in *FarmerChallengeReq, opts ...grpc.CallOption) (*FarmerChallengeRsp, error)
 	// farmer tell supervisor out of work
-	FarmerOffLine(ctx context.Context, in *FarmerOffLineReq, opts ...grpc.CallOption) (*FarmerOffLineReq, error)
+	FarmerOffLine(ctx context.Context, in *FarmerOffLineReq, opts ...grpc.CallOption) (*FarmerOffLineRsp, error)
 }
 
 type farmerPublicClient struct {
@@ -260,8 +310,8 @@ func (c *farmerPublicClient) FarmerChallenge(ctx context.Context, in *FarmerChal
 	return out, nil
 }
 
-func (c *farmerPublicClient) FarmerOffLine(ctx context.Context, in *FarmerOffLineReq, opts ...grpc.CallOption) (*FarmerOffLineReq, error) {
-	out := new(FarmerOffLineReq)
+func (c *farmerPublicClient) FarmerOffLine(ctx context.Context, in *FarmerOffLineReq, opts ...grpc.CallOption) (*FarmerOffLineRsp, error) {
+	out := new(FarmerOffLineRsp)
 	err := grpc.Invoke(ctx, "/protos.FarmerPublic/FarmerOffLine", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
@@ -279,7 +329,7 @@ type FarmerPublicServer interface {
 	// after FarmerPing, if need challenge, carry with blocks hash, if success, more balance(token) add
 	FarmerChallenge(context.Context, *FarmerChallengeReq) (*FarmerChallengeRsp, error)
 	// farmer tell supervisor out of work
-	FarmerOffLine(context.Context, *FarmerOffLineReq) (*FarmerOffLineReq, error)
+	FarmerOffLine(context.Context, *FarmerOffLineReq) (*FarmerOffLineRsp, error)
 }
 
 func RegisterFarmerPublicServer(s *grpc.Server, srv FarmerPublicServer) {
