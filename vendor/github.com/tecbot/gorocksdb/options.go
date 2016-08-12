@@ -325,7 +325,7 @@ func (opts *Options) SetMinLevelToCompress(value int) {
 // SetCompressionOptions sets different options for compression algorithms.
 // Default: nil
 func (opts *Options) SetCompressionOptions(value *CompressionOptions) {
-	C.rocksdb_options_set_compression_options(opts.c, C.int(value.WindowBits), C.int(value.Level), C.int(value.Strategy), C.int(value.MaxDictBytes))
+	C.rocksdb_options_set_compression_options(opts.c, C.int(value.WindowBits), C.int(value.Level), C.int(value.Strategy))
 }
 
 // SetPrefixExtractor sets the prefic extractor.
@@ -812,6 +812,17 @@ func (opts *Options) SetVerifyChecksumsInCompaction(value bool) {
 	C.rocksdb_options_set_verify_checksums_in_compaction(opts.c, boolToChar(value))
 }
 
+// SetFilterDeletes enable/disable filtering of deleted keys.
+//
+// Use KeyMayExist API to filter deletes when this is true.
+// If KeyMayExist returns false, i.e. the key definitely does not exist, then
+// the delete is a noop. KeyMayExist only incurs in-memory look up.
+// This optimization avoids writing the delete to storage when appropriate.
+// Default: false
+func (opts *Options) SetFilterDeletes(value bool) {
+	C.rocksdb_options_set_filter_deletes(opts.c, boolToChar(value))
+}
+
 // SetMaxSequentialSkipInIterations specifies whether an iteration->Next()
 // sequentially skips over keys with the same user-key or not.
 //
@@ -837,6 +848,21 @@ func (opts *Options) SetInplaceUpdateSupport(value bool) {
 // Default: 10000, if inplace_update_support = true, else 0.
 func (opts *Options) SetInplaceUpdateNumLocks(value int) {
 	C.rocksdb_options_set_inplace_update_num_locks(opts.c, C.size_t(value))
+}
+
+// SetMemtablePrefixBloomBits sets the bloom bits for prefix extractor.
+//
+// If prefix_extractor is set and bloom_bits is not 0, create prefix bloom
+// for memtable.
+// Default: 0
+func (opts *Options) SetMemtablePrefixBloomBits(value uint32) {
+	C.rocksdb_options_set_memtable_prefix_bloom_bits(opts.c, C.uint32_t(value))
+}
+
+// SetMemtablePrefixBloomProbes sets the number of hash probes per key.
+// Default: 6
+func (opts *Options) SetMemtablePrefixBloomProbes(value uint32) {
+	C.rocksdb_options_set_memtable_prefix_bloom_probes(opts.c, C.uint32_t(value))
 }
 
 // SetBloomLocality sets the bloom locality.

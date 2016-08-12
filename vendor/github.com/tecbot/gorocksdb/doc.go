@@ -3,10 +3,8 @@ Package gorocksdb provides the ability to create and access RocksDB databases.
 
 gorocksdb.OpenDb opens and creates databases.
 
-	bbto := gorocksdb.NewDefaultBlockBasedTableOptions()
-	bbto.SetBlockCache(gorocksdb.NewLRUCache(3 << 30))
 	opts := gorocksdb.NewDefaultOptions()
-	opts.SetBlockBasedTableFactory(bbto)
+	opts.SetBlockCache(gorocksdb.NewLRUCache(3<<30))
 	opts.SetCreateIfMissing(true)
 	db, err := gorocksdb.OpenDb(opts, "/path/to/db")
 
@@ -54,14 +52,12 @@ DB.Write.
 	err := db.Write(wo, wb)
 
 If your working dataset does not fit in memory, you'll want to add a bloom
-filter to your database. NewBloomFilter and
-BlockBasedTableOptions.SetFilterPolicy is what you want. NewBloomFilter is
-amount of bits in the filter to use per key in your database.
+filter to your database. NewBloomFilter and Options.SetFilterPolicy is what
+you want. NewBloomFilter is amount of bits in the filter to use per key in
+your database.
 
 	filter := gorocksdb.NewBloomFilter(10)
-	bbto := gorocksdb.NewDefaultBlockBasedTableOptions()
-	bbto.SetFilterPolicy(filter)
-	opts.SetBlockBasedTableFactory(bbto)
+	opts.SetFilterPolicy(filter)
 	db, err := gorocksdb.OpenDb(opts, "/path/to/db")
 
 If you're using a custom comparator in your code, be aware you may have to
