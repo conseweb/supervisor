@@ -17,10 +17,11 @@ package store
 
 import (
 	"fmt"
-	"gopkg.in/check.v1"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"gopkg.in/check.v1"
 )
 
 func Test(t *testing.T) {
