@@ -154,8 +154,11 @@ func (m *FarmerPingRsp) GetAccount() *FarmerAccount {
 }
 
 type FarmerChallengeReq struct {
-	FarmerID   string `protobuf:"bytes,1,opt,name=farmerID" json:"farmerID,omitempty"`
-	BlocksHash []byte `protobuf:"bytes,2,opt,name=blocksHash,proto3" json:"blocksHash,omitempty"`
+	FarmerID   string   `protobuf:"bytes,1,opt,name=farmerID" json:"farmerID,omitempty"`
+	BlocksHash []byte   `protobuf:"bytes,2,opt,name=blocksHash,proto3" json:"blocksHash,omitempty"`
+	HashType   HashType `protobuf:"varint,3,opt,name=hashType,enum=protos.HashType" json:"hashType,omitempty"`
+	HighBlock  uint64   `protobuf:"varint,4,opt,name=highBlock" json:"highBlock,omitempty"`
+	LowBlock   uint64   `protobuf:"varint,5,opt,name=lowBlock" json:"lowBlock,omitempty"`
 }
 
 func (m *FarmerChallengeReq) Reset()         { *m = FarmerChallengeReq{} }
