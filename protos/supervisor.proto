@@ -9,10 +9,77 @@ enum FarmerState {
     LOST = 2;
 }
 
+// farmer account's info
 message FarmerAccount {
+    // farmer's id, unique
     string farmerID = 1;
+    // used for election, used as vote
     uint32 balance = 2;
+    // farmer state
     FarmerState state = 3;
+    // last modified this obj's time
     int64 lastModifiedTime = 4;
-    int64 lastConquerTime = 5;
+    // last challenge blocks's hash's time
+    int64 lastChallengeTime = 5;
+}
+
+// farmer client can use the service to communicate with supervisor
+service FarmerPublic {
+    // when farmer lanch the cli(peer), it will call for notice supervisor that I'm online
+    rpc FarmerOnLine(FarmerOnLineReq) returns (FarmerOnLineRsp) {}
+
+    // every once in a while, farmer call for tell supervisor that how many blocks(range) stored in the farmer, supervisor return whelther need challenge that result randomly, if need, also return block range.
+    rpc FarmerPing(FarmerPingReq) returns (FarmerPingRsp) {}
+
+    // after FarmerPing, if need challenge, carry with blocks hash, if success, more balance(token) add
+    rpc FarmerChallenge(FarmerChallengeReq) returns (FarmerChallengeRsp) {}
+
+    // farmer tell supervisor out of work
+    rpc FarmerOffLine(FarmerOffLineReq) returns (FarmerOffLineReq) {}
+}
+
+message FarmerOnLineReq {
+    string farmerID = 1;
+}
+
+message FarmerOnLineRsp {
+    FarmerAccount account = 1;
+}
+
+message FarmerPingReq {
+    string farmerID = 1;
+    uint64 highBlock = 2;
+    uint64 lowBlock = 3;
+}
+
+enum HashType {
+    SHA256 = 0;
+    SHA1 = 1;
+    SHA3 = 2;
+}
+
+message FarmerPingRsp {
+    FarmerAccount account = 1;
+    bool needChallenge = 2;
+    HashType hashType = 3;
+    uint64 highBlock = 4;
+    uint64 lowBlock = 5;
+    int64 nextPing = 6;
+}
+
+message FarmerChallengeReq {
+    string farmerID = 1;
+    bytes blocksHash = 2;
+}
+
+message FarmerChallengeRsp {
+    FarmerAccount account = 1;
+}
+
+message FarmerOffLineReq {
+    string farmerID = 1;
+}
+
+message FarmerOffLineRsp {
+    FarmerAccount account = 1;
 }
