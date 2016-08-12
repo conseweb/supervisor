@@ -9,30 +9,6 @@
 			"revisionTime": "2016-07-17T15:07:09Z"
 		},
 		{
-			"checksumSHA1": "X1t71cdTc8h1V/N/NaXClUV0TPc=",
-			"path": "github.com/cockroachdb/c-jemalloc",
-			"revision": "42e6a32cd7a4dff9c70d80323681d46d046181ef",
-			"revisionTime": "2016-07-29T16:27:41Z"
-		},
-		{
-			"checksumSHA1": "k1G2kjA0vA9aFGFhhjp42bxIp88=",
-			"path": "github.com/cockroachdb/c-lz4",
-			"revision": "834d3303c9e84b1045bc57c3eb3723ee8cb4d33b",
-			"revisionTime": "2016-06-06T19:19:38Z"
-		},
-		{
-			"checksumSHA1": "fm7v4eSFCpiFvXGV3ovulsJrACI=",
-			"path": "github.com/cockroachdb/c-rocksdb",
-			"revision": "ab57b321a358f4c93fb639331ac3e10911649492",
-			"revisionTime": "2016-07-12T13:51:46Z"
-		},
-		{
-			"checksumSHA1": "oOsXjUrrJWETLIMVp6fsyKzFvXE=",
-			"path": "github.com/cockroachdb/c-snappy",
-			"revision": "d4e7b428fe7fc09e93573df3448567a62df8c9fa",
-			"revisionTime": "2016-06-06T19:20:24Z"
-		},
-		{
 			"checksumSHA1": "5MVpi9U1WCrzZ1VMMn61Fc+trE0=",
 			"path": "github.com/golang/protobuf/proto",
 			"revision": "2c1988e8c18d14b142c0b472624f71647cf39adb",
@@ -99,10 +75,10 @@
 			"revisionTime": "2015-11-10T04:22:04Z"
 		},
 		{
-			"checksumSHA1": "UGn6l8OTnMUhpR9Z6zyqR7mvxe8=",
+			"checksumSHA1": "wzd7hn+EAwAO7QZ0YbsQBK1m9gg=",
 			"path": "github.com/tecbot/gorocksdb",
-			"revision": "af118491248c30c4f40d0791ad7148f08c9651ce",
-			"revisionTime": "2016-08-08T18:58:22Z"
+			"revision": "e39123302f971c5539db303771dbea0503be59cb",
+			"revisionTime": "2016-01-29T21:06:01Z"
 		},
 		{
 			"checksumSHA1": "hKZGpbFuCrkE4s1vxubKK1aFlfI=",
