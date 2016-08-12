@@ -63,20 +63,41 @@ func (x FarmerState) String() string {
 type HashType int32
 
 const (
-	HashType_SHA256 HashType = 0
-	HashType_SHA1   HashType = 1
-	HashType_SHA3   HashType = 2
+	HashType_MD5     HashType = 0
+	HashType_SHA1    HashType = 1
+	HashType_SHA224  HashType = 2
+	HashType_SHA256  HashType = 3
+	HashType_SHA384  HashType = 4
+	HashType_SHA512  HashType = 5
+	HashType_SHA3224 HashType = 6
+	HashType_SHA3256 HashType = 7
+	HashType_SHA3384 HashType = 8
+	HashType_SHA3512 HashType = 9
 )
 
 var HashType_name = map[int32]string{
-	0: "SHA256",
+	0: "MD5",
 	1: "SHA1",
-	2: "SHA3",
+	2: "SHA224",
+	3: "SHA256",
+	4: "SHA384",
+	5: "SHA512",
+	6: "SHA3224",
+	7: "SHA3256",
+	8: "SHA3384",
+	9: "SHA3512",
 }
 var HashType_value = map[string]int32{
-	"SHA256": 0,
-	"SHA1":   1,
-	"SHA3":   2,
+	"MD5":     0,
+	"SHA1":    1,
+	"SHA224":  2,
+	"SHA256":  3,
+	"SHA384":  4,
+	"SHA512":  5,
+	"SHA3224": 6,
+	"SHA3256": 7,
+	"SHA3384": 8,
+	"SHA3512": 9,
 }
 
 func (x HashType) String() string {
@@ -251,7 +272,7 @@ type FarmerPublicClient interface {
 	// after FarmerPing, if need challenge, carry with blocks hash, if success, more balance(token) add
 	FarmerChallenge(ctx context.Context, in *FarmerChallengeReq, opts ...grpc.CallOption) (*FarmerChallengeRsp, error)
 	// farmer tell supervisor out of work
-	FarmerOffLine(ctx context.Context, in *FarmerOffLineReq, opts ...grpc.CallOption) (*FarmerOffLineReq, error)
+	FarmerOffLine(ctx context.Context, in *FarmerOffLineReq, opts ...grpc.CallOption) (*FarmerOffLineRsp, error)
 }
 
 type farmerPublicClient struct {
@@ -289,8 +310,8 @@ func (c *farmerPublicClient) FarmerChallenge(ctx context.Context, in *FarmerChal
 	return out, nil
 }
 
-func (c *farmerPublicClient) FarmerOffLine(ctx context.Context, in *FarmerOffLineReq, opts ...grpc.CallOption) (*FarmerOffLineReq, error) {
-	out := new(FarmerOffLineReq)
+func (c *farmerPublicClient) FarmerOffLine(ctx context.Context, in *FarmerOffLineReq, opts ...grpc.CallOption) (*FarmerOffLineRsp, error) {
+	out := new(FarmerOffLineRsp)
 	err := grpc.Invoke(ctx, "/protos.FarmerPublic/FarmerOffLine", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
@@ -308,7 +329,7 @@ type FarmerPublicServer interface {
 	// after FarmerPing, if need challenge, carry with blocks hash, if success, more balance(token) add
 	FarmerChallenge(context.Context, *FarmerChallengeReq) (*FarmerChallengeRsp, error)
 	// farmer tell supervisor out of work
-	FarmerOffLine(context.Context, *FarmerOffLineReq) (*FarmerOffLineReq, error)
+	FarmerOffLine(context.Context, *FarmerOffLineReq) (*FarmerOffLineRsp, error)
 }
 
 func RegisterFarmerPublicServer(s *grpc.Server, srv FarmerPublicServer) {

@@ -35,7 +35,7 @@ service FarmerPublic {
     rpc FarmerChallenge(FarmerChallengeReq) returns (FarmerChallengeRsp) {}
 
     // farmer tell supervisor out of work
-    rpc FarmerOffLine(FarmerOffLineReq) returns (FarmerOffLineReq) {}
+    rpc FarmerOffLine(FarmerOffLineReq) returns (FarmerOffLineRsp) {}
 }
 
 message FarmerOnLineReq {
@@ -58,9 +58,16 @@ message FarmerPingReq {
 }
 
 enum HashType {
-    SHA256 = 0;
+    MD5 = 0;
     SHA1 = 1;
-    SHA3 = 2;
+    SHA224 = 2;
+    SHA256 = 3;
+    SHA384 = 4;
+    SHA512 = 5;
+    SHA3224 = 6;
+    SHA3256 = 7;
+    SHA3384 = 8;
+    SHA3512 = 9;
 }
 
 message FarmerPingRsp {
