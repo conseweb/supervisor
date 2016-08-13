@@ -18,44 +18,48 @@ package challenge
 import (
 	"fmt"
 	pb "github.com/conseweb/supervisor/protos"
+	"sync"
 )
 
 type BlocksHashCache interface {
-	GetFromBlocksHashCache(highBlockNumber, lowBlockBumber uint64, hashType pb.HashType) (string, bool)
-	SetBlocksHashToCache(highBlockNumber, lowBlockBumber uint64, hashType pb.HashType, hash string) bool
+	GetFromBlocksHashCache(highBlockNumber, lowBlockBumber uint64, hashAlgo pb.HashAlgo) (string, bool)
+	SetBlocksHashToCache(highBlockNumber, lowBlockBumber uint64, hashAlgo pb.HashAlgo, hash string) bool
 }
 
 type defaultBlocksHashCache struct {
-	caches map[string]*blocksHash
+	caches map[string]*blocksHashItem
 }
 
-type blocksHash struct {
+type blocksHashItem struct {
 	blocksRange *pb.BlocksRange
-	hashType    pb.HashType
+	hashAlgo    pb.HashAlgo
 	hash        string
 }
 
-func (this *defaultBlocksHashCache) GetFromBlocksHashCache(highBlockNumber, lowBlockBumber uint64, hashType pb.HashType) (string, bool) {
-	key := this.blocksHashCacheKey(highBlockNumber, lowBlockBumber, hashType)
+func (this *defaultBlocksHashCache) GetFromBlocksHashCache(highBlockNumber, lowBlockBumber uint64, hashAlgo pb.HashAlgo) (string, bool) {
+	key := this.blocksHashCacheKey(highBlockNumber, lowBlockBumber, hashAlgo)
 
 	cache, ok := this.caches[key]
 	if !ok {
+		logger.Debugf("blockshash(%s) didn't hit the cache", key)
 		return "", false
 	}
 
+	logger.Debugf("blockshash(%s) hit the cache: %v", key, cache)
 	return cache.hash, true
 }
 
-func (this *defaultBlocksHashCache) SetBlocksHashToCache(highBlockNumber, lowBlockBumber uint64, hashType pb.HashType, hash string) bool {
-	key := this.blocksHashCacheKey(highBlockNumber, lowBlockBumber, hashType)
+func (this *defaultBlocksHashCache) SetBlocksHashToCache(highBlockNumber, lowBlockBumber uint64, hashAlgo pb.HashAlgo, hash string) bool {
+	key := this.blocksHashCacheKey(highBlockNumber, lowBlockBumber, hashAlgo)
 
 	if _, ok := this.caches[key]; !ok {
-		this.caches[key] = &blocksHash{
+		logger.Debugf("blockshash(%s) set to the cache", key)
+		this.caches[key] = &blocksHashItem{
 			blocksRange: &pb.BlocksRange{
 				HighBlockNumber: highBlockNumber,
 				LowBlockNumber:  lowBlockBumber,
 			},
-			hashType: hashType,
+			hashAlgo: hashAlgo,
 			hash:     hash,
 		}
 
@@ -65,18 +69,29 @@ func (this *defaultBlocksHashCache) SetBlocksHashToCache(highBlockNumber, lowBlo
 	return false
 }
 
-func (this *defaultBlocksHashCache) blocksHashCacheKey(highBlockNumber, lowBlockBumber uint64, hashType pb.HashType) string {
-	return HASH(pb.HashType_SHA256, []byte(fmt.Sprintf("%v/%v/%s", highBlockNumber, lowBlockBumber, hashType.String())))
+func (this *defaultBlocksHashCache) blocksHashCacheKey(highBlockNumber, lowBlockBumber uint64, hashAlgo pb.HashAlgo) string {
+	return HASH(pb.HashAlgo_SHA256, []byte(fmt.Sprintf("%v/%v/%s", highBlockNumber, lowBlockBumber, hashAlgo.String())))
 }
 
-func NewDefaultBlocksHashCache() BlocksHashCache {
+var (
+	blocksHashCache BlocksHashCache
+	hashonce        *sync.Once
+)
+
+func newDefaultBlocksHashCache() BlocksHashCache {
 	return &defaultBlocksHashCache{
-		caches: make(map[string]*blocksHash),
+		caches: make(map[string]*blocksHashItem),
 	}
 }
 
-var blocksHashCache BlocksHashCache
+func GetBlocksHashCache() BlocksHashCache {
+	hashonce.Do(func() {
+		blocksHashCache = newDefaultBlocksHashCache()
+	})
+
+	return blocksHashCache
+}
 
 func init() {
-	blocksHashCache = NewDefaultBlocksHashCache()
+	hashonce = &sync.Once{}
 }

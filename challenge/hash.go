@@ -27,29 +27,29 @@ import (
 	"strings"
 )
 
-func HASH(hashType pb.HashType, p []byte) string {
+func HASH(hashAlgo pb.HashAlgo, p []byte) string {
 	var h hash.Hash
 
-	switch hashType {
-	case pb.HashType_MD5:
+	switch hashAlgo {
+	case pb.HashAlgo_MD5:
 		h = md5.New()
-	case pb.HashType_SHA1:
+	case pb.HashAlgo_SHA1:
 		h = sha1.New()
-	case pb.HashType_SHA224:
+	case pb.HashAlgo_SHA224:
 		h = sha256.New224()
-	case pb.HashType_SHA256:
+	case pb.HashAlgo_SHA256:
 		h = sha256.New()
-	case pb.HashType_SHA384:
+	case pb.HashAlgo_SHA384:
 		h = sha512.New384()
-	case pb.HashType_SHA512:
+	case pb.HashAlgo_SHA512:
 		h = sha512.New()
-	case pb.HashType_SHA3224:
+	case pb.HashAlgo_SHA3224:
 		h = sha3.New224()
-	case pb.HashType_SHA3256:
+	case pb.HashAlgo_SHA3256:
 		h = sha3.New256()
-	case pb.HashType_SHA3384:
+	case pb.HashAlgo_SHA3384:
 		h = sha3.New384()
-	case pb.HashType_SHA3512:
+	case pb.HashAlgo_SHA3512:
 		h = sha3.New512()
 	default:
 		h = sha256.New()

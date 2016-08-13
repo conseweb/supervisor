@@ -27,31 +27,31 @@ type BlocksHashCacheTest struct {
 var _ = check.Suite(&BlocksHashCacheTest{})
 
 func (this *BlocksHashCacheTest) TestDefaultBlocksHashCacheSet(c *check.C) {
-	cache := NewDefaultBlocksHashCache()
+	cache := GetBlocksHashCache()
 
-	c.Check(cache.SetBlocksHashToCache(100, 20, pb.HashType_SHA1, "pretend as hash"), check.Equals, true)
-	c.Check(cache.SetBlocksHashToCache(100, 20, pb.HashType_SHA1, "pretend as hash"), check.Equals, false)
+	c.Check(cache.SetBlocksHashToCache(100, 21, pb.HashAlgo_SHA1, "pretend as hash"), check.Equals, true)
+	c.Check(cache.SetBlocksHashToCache(100, 21, pb.HashAlgo_SHA1, "pretend as hash"), check.Equals, false)
 }
 
 func (this *BlocksHashCacheTest) TestDefaultBlocksHashCacheGet(c *check.C) {
-	cache := NewDefaultBlocksHashCache()
-	cache.SetBlocksHashToCache(100, 20, pb.HashType_SHA1, "pretend as hash")
+	cache := GetBlocksHashCache()
+	cache.SetBlocksHashToCache(100, 20, pb.HashAlgo_SHA1, "pretend as hash")
 
-	hash, getted := cache.GetFromBlocksHashCache(100, 20, pb.HashType_SHA1)
+	hash, getted := cache.GetFromBlocksHashCache(100, 20, pb.HashAlgo_SHA1)
 	c.Check(getted, check.Equals, true)
 	c.Check(hash, check.Equals, "pretend as hash")
 }
 
 func (this *BlocksHashCacheTest) BenchmarkDefaultBlocksHashCacheSet(c *check.C) {
-	cache := NewDefaultBlocksHashCache()
+	cache := GetBlocksHashCache()
 	for i := 0; i < c.N; i++ {
-		cache.SetBlocksHashToCache(100+uint64(i), 20, pb.HashType_SHA1, "pretend as hash")
+		cache.SetBlocksHashToCache(100+uint64(i), 20, pb.HashAlgo_SHA1, "pretend as hash")
 	}
 }
 
 func (this *BlocksHashCacheTest) BenchmarkDefaultBlocksHashCacheGet(c *check.C) {
-	cache := NewDefaultBlocksHashCache()
+	cache := GetBlocksHashCache()
 	for i := 0; i < c.N; i++ {
-		cache.GetFromBlocksHashCache(100+uint64(i), 20, pb.HashType_SHA1)
+		cache.GetFromBlocksHashCache(100+uint64(i), 20, pb.HashAlgo_SHA1)
 	}
 }

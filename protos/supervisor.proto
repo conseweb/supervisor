@@ -32,7 +32,7 @@ service FarmerPublic {
     rpc FarmerPing(FarmerPingReq) returns (FarmerPingRsp) {}
 
     // after FarmerPing, if need challenge, carry with blocks hash, if success, more balance(token) add
-    rpc FarmerChallenge(FarmerChallengeReq) returns (FarmerChallengeRsp) {}
+    rpc FarmerConquerChallenge(FarmerConquerChallengeReq) returns (FarmerConquerChallengeRsp) {}
 
     // farmer tell supervisor out of work
     rpc FarmerOffLine(FarmerOffLineReq) returns (FarmerOffLineRsp) {}
@@ -57,7 +57,7 @@ message FarmerPingReq {
     BlocksRange blocksRange = 2;
 }
 
-enum HashType {
+enum HashAlgo {
     MD5 = 0;
     SHA1 = 1;
     SHA224 = 2;
@@ -73,19 +73,19 @@ enum HashType {
 message FarmerPingRsp {
     FarmerAccount account = 1;
     bool needChallenge = 2;
-    HashType hashType = 3;
+    HashAlgo hashAlgo = 3;
     BlocksRange blocksRange = 4;
     int64 nextPing = 5;
 }
 
-message FarmerChallengeReq {
+message FarmerConquerChallengeReq {
     string farmerID = 1;
     bytes blocksHash = 2;
-    HashType hashType = 3;
+    HashAlgo hashAlgo = 3;
     BlocksRange blocksRange = 4;
 }
 
-message FarmerChallengeRsp {
+message FarmerConquerChallengeRsp {
     FarmerAccount account = 1;
 }
 
