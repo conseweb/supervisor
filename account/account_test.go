@@ -42,6 +42,7 @@ func (this *TestFarmerAccount) SetUpSuite(c *check.C) {
 	viper.Set("farmer.ping.up", 900)
 	viper.Set("farmer.ping.down", 800)
 	viper.Set("farmer.ping.lostcount", 2)
+	viper.Set("farmer.challenge.hash", "SHA256")
 }
 
 func (this *TestFarmerAccount) TearDownSuite(c *check.C) {
@@ -77,4 +78,14 @@ func (this *TestFarmerAccount) TestOffLine(c *check.C) {
 
 	c.Check(handler.OffLine(), check.IsNil)
 	c.Assert(handler.Account().State, check.Equals, pb.FarmerState_OFFLINE)
+}
+
+func (this *TestFarmerAccount) TestChallengeHashType(c *check.C) {
+	handler := NewFarmerHandler("farmerId0004")
+
+	c.Assert(handler.ChallengeHashType(), check.Equals, pb.HashType_SHA256)
+
+	viper.Set("farmer.challenge.hash", "SHA512")
+	c.Assert(handler.ChallengeHashType(), check.Not(check.Equals), pb.HashType_SHA256)
+	c.Assert(handler.ChallengeHashType(), check.Equals, pb.HashType_SHA512)
 }

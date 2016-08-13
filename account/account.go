@@ -233,9 +233,13 @@ func (this *FarmerAccountHandler) NeedChallengeBlocks(highBlockNumber, lowBlockB
 	return
 }
 
-// randomly choose challenge hash type
+// choose challenge hash type from viper
 func (this *FarmerAccountHandler) ChallengeHashType() pb.HashType {
-	return pb.HashType(pb.HashType_value[pb.HashType_name[int32((rand.Int()%len(pb.HashType_value)))]])
+	hashType := viper.GetString("farmer.challenge.hash")
+	if hashType == "" {
+		hashType = pb.HashType_SHA256.String()
+	}
+	return pb.HashType(pb.HashType_value[hashType])
 }
 
 // randomly return next ping time
