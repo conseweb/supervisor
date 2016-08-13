@@ -16,14 +16,12 @@ limitations under the License.
 package account
 
 import (
+	"github.com/spf13/viper"
+	"gopkg.in/check.v1"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
-
-	pb "github.com/conseweb/supervisor/protos"
-	"github.com/spf13/viper"
-	"gopkg.in/check.v1"
 )
 
 func TestAccount(t *testing.T) {
@@ -49,43 +47,4 @@ func (this *TestFarmerAccount) TearDownSuite(c *check.C) {
 	time.Sleep(time.Second)
 	Close()
 	os.Remove(filepath.Join(os.TempDir(), "testAccount"))
-}
-
-func (this *TestFarmerAccount) TestOnLine(c *check.C) {
-	handler := NewFarmerHandler("farmerId0001")
-	c.Check(handler.OnLine(), check.IsNil)
-	c.Assert(handler.Account().State, check.Equals, pb.FarmerState_ONLINE)
-}
-
-func (this *TestFarmerAccount) TestLost(c *check.C) {
-	handler := NewFarmerHandler("farmerId0002")
-	c.Check(handler.OnLine(), check.IsNil)
-	c.Assert(handler.Account().State, check.Equals, pb.FarmerState_ONLINE)
-
-	handler.lostCount++
-	c.Check(handler.Lost(), check.IsNil)
-	c.Assert(handler.Account().State, check.Equals, pb.FarmerState_LOST)
-}
-
-func (this *TestFarmerAccount) TestOffLine(c *check.C) {
-	handler := NewFarmerHandler("farmerId0003")
-	c.Check(handler.OnLine(), check.IsNil)
-	c.Assert(handler.Account().State, check.Equals, pb.FarmerState_ONLINE)
-
-	handler.lostCount++
-	c.Check(handler.Lost(), check.IsNil)
-	c.Assert(handler.Account().State, check.Equals, pb.FarmerState_LOST)
-
-	c.Check(handler.OffLine(), check.IsNil)
-	c.Assert(handler.Account().State, check.Equals, pb.FarmerState_OFFLINE)
-}
-
-func (this *TestFarmerAccount) TestChallengeHashType(c *check.C) {
-	handler := NewFarmerHandler("farmerId0004")
-
-	c.Assert(handler.ChallengeHashType(), check.Equals, pb.HashType_SHA256)
-
-	viper.Set("farmer.challenge.hash", "SHA512")
-	c.Assert(handler.ChallengeHashType(), check.Not(check.Equals), pb.HashType_SHA256)
-	c.Assert(handler.ChallengeHashType(), check.Equals, pb.HashType_SHA512)
 }
