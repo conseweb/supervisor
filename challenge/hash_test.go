@@ -21,7 +21,7 @@ import (
 	pb "github.com/conseweb/supervisor/protos"
 )
 
-func TestHash(t *testing.T) {
+func Test(t *testing.T) {
 	check.TestingT(t)
 }
 
