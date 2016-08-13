@@ -15,8 +15,8 @@ It has these top-level messages:
 	BlocksRange
 	FarmerPingReq
 	FarmerPingRsp
-	FarmerChallengeReq
-	FarmerChallengeRsp
+	FarmerConquerChallengeReq
+	FarmerConquerChallengeRsp
 	FarmerOffLineReq
 	FarmerOffLineRsp
 */
@@ -60,22 +60,22 @@ func (x FarmerState) String() string {
 	return proto.EnumName(FarmerState_name, int32(x))
 }
 
-type HashType int32
+type HashAlgo int32
 
 const (
-	HashType_MD5     HashType = 0
-	HashType_SHA1    HashType = 1
-	HashType_SHA224  HashType = 2
-	HashType_SHA256  HashType = 3
-	HashType_SHA384  HashType = 4
-	HashType_SHA512  HashType = 5
-	HashType_SHA3224 HashType = 6
-	HashType_SHA3256 HashType = 7
-	HashType_SHA3384 HashType = 8
-	HashType_SHA3512 HashType = 9
+	HashAlgo_MD5     HashAlgo = 0
+	HashAlgo_SHA1    HashAlgo = 1
+	HashAlgo_SHA224  HashAlgo = 2
+	HashAlgo_SHA256  HashAlgo = 3
+	HashAlgo_SHA384  HashAlgo = 4
+	HashAlgo_SHA512  HashAlgo = 5
+	HashAlgo_SHA3224 HashAlgo = 6
+	HashAlgo_SHA3256 HashAlgo = 7
+	HashAlgo_SHA3384 HashAlgo = 8
+	HashAlgo_SHA3512 HashAlgo = 9
 )
 
-var HashType_name = map[int32]string{
+var HashAlgo_name = map[int32]string{
 	0: "MD5",
 	1: "SHA1",
 	2: "SHA224",
@@ -87,7 +87,7 @@ var HashType_name = map[int32]string{
 	8: "SHA3384",
 	9: "SHA3512",
 }
-var HashType_value = map[string]int32{
+var HashAlgo_value = map[string]int32{
 	"MD5":     0,
 	"SHA1":    1,
 	"SHA224":  2,
@@ -100,8 +100,8 @@ var HashType_value = map[string]int32{
 	"SHA3512": 9,
 }
 
-func (x HashType) String() string {
-	return proto.EnumName(HashType_name, int32(x))
+func (x HashAlgo) String() string {
+	return proto.EnumName(HashAlgo_name, int32(x))
 }
 
 // farmer account's info
@@ -174,7 +174,7 @@ func (m *FarmerPingReq) GetBlocksRange() *BlocksRange {
 type FarmerPingRsp struct {
 	Account       *FarmerAccount `protobuf:"bytes,1,opt,name=account" json:"account,omitempty"`
 	NeedChallenge bool           `protobuf:"varint,2,opt,name=needChallenge" json:"needChallenge,omitempty"`
-	HashType      HashType       `protobuf:"varint,3,opt,name=hashType,enum=protos.HashType" json:"hashType,omitempty"`
+	HashAlgo      HashAlgo       `protobuf:"varint,3,opt,name=hashAlgo,enum=protos.HashAlgo" json:"hashAlgo,omitempty"`
 	BlocksRange   *BlocksRange   `protobuf:"bytes,4,opt,name=blocksRange" json:"blocksRange,omitempty"`
 	NextPing      int64          `protobuf:"varint,5,opt,name=nextPing" json:"nextPing,omitempty"`
 }
@@ -197,33 +197,33 @@ func (m *FarmerPingRsp) GetBlocksRange() *BlocksRange {
 	return nil
 }
 
-type FarmerChallengeReq struct {
+type FarmerConquerChallengeReq struct {
 	FarmerID    string       `protobuf:"bytes,1,opt,name=farmerID" json:"farmerID,omitempty"`
 	BlocksHash  []byte       `protobuf:"bytes,2,opt,name=blocksHash,proto3" json:"blocksHash,omitempty"`
-	HashType    HashType     `protobuf:"varint,3,opt,name=hashType,enum=protos.HashType" json:"hashType,omitempty"`
+	HashAlgo    HashAlgo     `protobuf:"varint,3,opt,name=hashAlgo,enum=protos.HashAlgo" json:"hashAlgo,omitempty"`
 	BlocksRange *BlocksRange `protobuf:"bytes,4,opt,name=blocksRange" json:"blocksRange,omitempty"`
 }
 
-func (m *FarmerChallengeReq) Reset()         { *m = FarmerChallengeReq{} }
-func (m *FarmerChallengeReq) String() string { return proto.CompactTextString(m) }
-func (*FarmerChallengeReq) ProtoMessage()    {}
+func (m *FarmerConquerChallengeReq) Reset()         { *m = FarmerConquerChallengeReq{} }
+func (m *FarmerConquerChallengeReq) String() string { return proto.CompactTextString(m) }
+func (*FarmerConquerChallengeReq) ProtoMessage()    {}
 
-func (m *FarmerChallengeReq) GetBlocksRange() *BlocksRange {
+func (m *FarmerConquerChallengeReq) GetBlocksRange() *BlocksRange {
 	if m != nil {
 		return m.BlocksRange
 	}
 	return nil
 }
 
-type FarmerChallengeRsp struct {
+type FarmerConquerChallengeRsp struct {
 	Account *FarmerAccount `protobuf:"bytes,1,opt,name=account" json:"account,omitempty"`
 }
 
-func (m *FarmerChallengeRsp) Reset()         { *m = FarmerChallengeRsp{} }
-func (m *FarmerChallengeRsp) String() string { return proto.CompactTextString(m) }
-func (*FarmerChallengeRsp) ProtoMessage()    {}
+func (m *FarmerConquerChallengeRsp) Reset()         { *m = FarmerConquerChallengeRsp{} }
+func (m *FarmerConquerChallengeRsp) String() string { return proto.CompactTextString(m) }
+func (*FarmerConquerChallengeRsp) ProtoMessage()    {}
 
-func (m *FarmerChallengeRsp) GetAccount() *FarmerAccount {
+func (m *FarmerConquerChallengeRsp) GetAccount() *FarmerAccount {
 	if m != nil {
 		return m.Account
 	}
@@ -255,7 +255,7 @@ func (m *FarmerOffLineRsp) GetAccount() *FarmerAccount {
 
 func init() {
 	proto.RegisterEnum("protos.FarmerState", FarmerState_name, FarmerState_value)
-	proto.RegisterEnum("protos.HashType", HashType_name, HashType_value)
+	proto.RegisterEnum("protos.HashAlgo", HashAlgo_name, HashAlgo_value)
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -270,7 +270,7 @@ type FarmerPublicClient interface {
 	// every once in a while, farmer call for tell supervisor that how many blocks(range) stored in the farmer, supervisor return whelther need challenge that result randomly, if need, also return block range.
 	FarmerPing(ctx context.Context, in *FarmerPingReq, opts ...grpc.CallOption) (*FarmerPingRsp, error)
 	// after FarmerPing, if need challenge, carry with blocks hash, if success, more balance(token) add
-	FarmerChallenge(ctx context.Context, in *FarmerChallengeReq, opts ...grpc.CallOption) (*FarmerChallengeRsp, error)
+	FarmerConquerChallenge(ctx context.Context, in *FarmerConquerChallengeReq, opts ...grpc.CallOption) (*FarmerConquerChallengeRsp, error)
 	// farmer tell supervisor out of work
 	FarmerOffLine(ctx context.Context, in *FarmerOffLineReq, opts ...grpc.CallOption) (*FarmerOffLineRsp, error)
 }
@@ -301,9 +301,9 @@ func (c *farmerPublicClient) FarmerPing(ctx context.Context, in *FarmerPingReq, 
 	return out, nil
 }
 
-func (c *farmerPublicClient) FarmerChallenge(ctx context.Context, in *FarmerChallengeReq, opts ...grpc.CallOption) (*FarmerChallengeRsp, error) {
-	out := new(FarmerChallengeRsp)
-	err := grpc.Invoke(ctx, "/protos.FarmerPublic/FarmerChallenge", in, out, c.cc, opts...)
+func (c *farmerPublicClient) FarmerConquerChallenge(ctx context.Context, in *FarmerConquerChallengeReq, opts ...grpc.CallOption) (*FarmerConquerChallengeRsp, error) {
+	out := new(FarmerConquerChallengeRsp)
+	err := grpc.Invoke(ctx, "/protos.FarmerPublic/FarmerConquerChallenge", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -327,7 +327,7 @@ type FarmerPublicServer interface {
 	// every once in a while, farmer call for tell supervisor that how many blocks(range) stored in the farmer, supervisor return whelther need challenge that result randomly, if need, also return block range.
 	FarmerPing(context.Context, *FarmerPingReq) (*FarmerPingRsp, error)
 	// after FarmerPing, if need challenge, carry with blocks hash, if success, more balance(token) add
-	FarmerChallenge(context.Context, *FarmerChallengeReq) (*FarmerChallengeRsp, error)
+	FarmerConquerChallenge(context.Context, *FarmerConquerChallengeReq) (*FarmerConquerChallengeRsp, error)
 	// farmer tell supervisor out of work
 	FarmerOffLine(context.Context, *FarmerOffLineReq) (*FarmerOffLineRsp, error)
 }
@@ -360,12 +360,12 @@ func _FarmerPublic_FarmerPing_Handler(srv interface{}, ctx context.Context, code
 	return out, nil
 }
 
-func _FarmerPublic_FarmerChallenge_Handler(srv interface{}, ctx context.Context, codec grpc.Codec, buf []byte) (interface{}, error) {
-	in := new(FarmerChallengeReq)
+func _FarmerPublic_FarmerConquerChallenge_Handler(srv interface{}, ctx context.Context, codec grpc.Codec, buf []byte) (interface{}, error) {
+	in := new(FarmerConquerChallengeReq)
 	if err := codec.Unmarshal(buf, in); err != nil {
 		return nil, err
 	}
-	out, err := srv.(FarmerPublicServer).FarmerChallenge(ctx, in)
+	out, err := srv.(FarmerPublicServer).FarmerConquerChallenge(ctx, in)
 	if err != nil {
 		return nil, err
 	}
@@ -397,8 +397,8 @@ var _FarmerPublic_serviceDesc = grpc.ServiceDesc{
 			Handler:    _FarmerPublic_FarmerPing_Handler,
 		},
 		{
-			MethodName: "FarmerChallenge",
-			Handler:    _FarmerPublic_FarmerChallenge_Handler,
+			MethodName: "FarmerConquerChallenge",
+			Handler:    _FarmerPublic_FarmerConquerChallenge_Handler,
 		},
 		{
 			MethodName: "FarmerOffLine",
