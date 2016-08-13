@@ -48,12 +48,12 @@ func (this *FarmerAccountHandler) NeedChallengeBlocks(highBlockNumber, lowBlockB
 }
 
 // choose challenge hash type from viper
-func (this *FarmerAccountHandler) ChallengeHashType() pb.HashType {
-	hashType := viper.GetString("farmer.challenge.hash")
-	if hashType == "" {
-		hashType = pb.HashType_SHA256.String()
+func (this *FarmerAccountHandler) ChallengeHashAlgo() pb.HashAlgo {
+	hashAlgo := viper.GetString("farmer.challenge.hashalgo")
+	if hashAlgo == "" {
+		hashAlgo = pb.HashAlgo_SHA256.String()
 	}
-	return pb.HashType(pb.HashType_value[hashType])
+	return pb.HashAlgo(pb.HashAlgo_value[hashAlgo])
 }
 
 // randomly return next ping time
@@ -166,20 +166,26 @@ func (this *FarmerAccountHandler) unmarshal(fBytes []byte) error {
 
 func nextPingInterval() time.Duration {
 	basicInterval := viper.GetInt("farmer.ping.interval")
-	up := viper.GetInt("farmer.ping.up")
-	down := viper.GetInt("farmer.ping.down")
-
-	interval := basicInterval
-	upflag := (rand.Int() % 2) == 0
-	if upflag {
-		interval += rand.Intn(up)
-	} else {
-		interval -= rand.Intn(down)
+	if basicInterval == 0 {
+		basicInterval = 900
 	}
 
-	if interval < 0 {
-		interval = basicInterval
-	}
+	return time.Duration(basicInterval) * time.Second
 
-	return time.Duration(interval) * time.Second
+	//up := viper.GetInt("farmer.ping.up")
+	//down := viper.GetInt("farmer.ping.down")
+	//
+	//interval := basicInterval
+	//upflag := (rand.Int() % 2) == 0
+	//if upflag {
+	//	interval += rand.Intn(up)
+	//} else {
+	//	interval -= rand.Intn(down)
+	//}
+	//
+	//if interval < 0 {
+	//	interval = basicInterval
+	//}
+	//
+	//return time.Duration(interval) * time.Second
 }

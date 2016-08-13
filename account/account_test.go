@@ -16,12 +16,12 @@ limitations under the License.
 package account
 
 import (
-	"github.com/spf13/viper"
-	"gopkg.in/check.v1"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
+	"github.com/spf13/viper"
+	"gopkg.in/check.v1"
 )
 
 func TestAccount(t *testing.T) {
@@ -40,7 +40,7 @@ func (this *TestFarmerAccount) SetUpSuite(c *check.C) {
 	viper.Set("farmer.ping.up", 900)
 	viper.Set("farmer.ping.down", 800)
 	viper.Set("farmer.ping.lostcount", 2)
-	viper.Set("farmer.challenge.hash", "SHA256")
+	viper.Set("farmer.challenge.hashalgo", "SHA256")
 }
 
 func (this *TestFarmerAccount) TearDownSuite(c *check.C) {

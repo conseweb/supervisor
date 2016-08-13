@@ -50,12 +50,12 @@ func (this *TestFarmerAccount) TestOffLine(c *check.C) {
 	c.Assert(handler.Account().State, check.Equals, pb.FarmerState_OFFLINE)
 }
 
-func (this *TestFarmerAccount) TestChallengeHashType(c *check.C) {
+func (this *TestFarmerAccount) TestChallengeHashAlgo(c *check.C) {
 	handler := NewFarmerHandler("farmerId0004")
 
-	c.Assert(handler.ChallengeHashType(), check.Equals, pb.HashType_SHA256)
+	c.Assert(handler.ChallengeHashAlgo(), check.Equals, pb.HashAlgo_SHA256)
 
-	viper.Set("farmer.challenge.hash", "SHA512")
-	c.Assert(handler.ChallengeHashType(), check.Not(check.Equals), pb.HashType_SHA256)
-	c.Assert(handler.ChallengeHashType(), check.Equals, pb.HashType_SHA512)
+	viper.Set("farmer.challenge.hashalgo", "SHA512")
+	c.Assert(handler.ChallengeHashAlgo(), check.Not(check.Equals), pb.HashAlgo_SHA256)
+	c.Assert(handler.ChallengeHashAlgo(), check.Equals, pb.HashAlgo_SHA512)
 }
