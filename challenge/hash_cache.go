@@ -69,13 +69,13 @@ func (this *defaultBlocksHashCache) blocksHashCacheKey(highBlockNumber, lowBlock
 	return HASH(pb.HashType_SHA256, []byte(fmt.Sprintf("%v/%v/%s", highBlockNumber, lowBlockBumber, hashType.String())))
 }
 
-func NewDefaultBlocksHashCache() *defaultBlocksHashCache {
+func NewDefaultBlocksHashCache() BlocksHashCache {
 	return &defaultBlocksHashCache{
 		caches: make(map[string]*blocksHash),
 	}
 }
 
-var blocksHashCache *defaultBlocksHashCache
+var blocksHashCache BlocksHashCache
 
 func init() {
 	blocksHashCache = NewDefaultBlocksHashCache()
