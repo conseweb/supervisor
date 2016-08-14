@@ -15,6 +15,84 @@
 			"revisionTime": "2016-08-08T18:15:00Z"
 		},
 		{
+			"checksumSHA1": "oNlUxDAeutfODRPQMbtLbT/xq9c=",
+			"path": "github.com/hyperledger/fabric/core/db",
+			"revision": "8002995147b6376f7fdb598f09831e7b413171e1",
+			"revisionTime": "2016-08-05T13:33:47Z"
+		},
+		{
+			"checksumSHA1": "2va1334Ht3Qyt9XjsCL7X5N4zHY=",
+			"path": "github.com/hyperledger/fabric/core/ledger",
+			"revision": "8002995147b6376f7fdb598f09831e7b413171e1",
+			"revisionTime": "2016-08-05T13:33:47Z"
+		},
+		{
+			"checksumSHA1": "8PtjLjOLwh7nXLKjFlUOi3AGIxc=",
+			"path": "github.com/hyperledger/fabric/core/ledger/perfstat",
+			"revision": "8002995147b6376f7fdb598f09831e7b413171e1",
+			"revisionTime": "2016-08-05T13:33:47Z"
+		},
+		{
+			"checksumSHA1": "fe1ZmhzsszqqL6rVB8k/xEwgKsM=",
+			"path": "github.com/hyperledger/fabric/core/ledger/statemgmt",
+			"revision": "8002995147b6376f7fdb598f09831e7b413171e1",
+			"revisionTime": "2016-08-05T13:33:47Z"
+		},
+		{
+			"checksumSHA1": "pR4l3UQlA5qcQAx4lc3T5mfcVvM=",
+			"path": "github.com/hyperledger/fabric/core/ledger/statemgmt/buckettree",
+			"revision": "8002995147b6376f7fdb598f09831e7b413171e1",
+			"revisionTime": "2016-08-05T13:33:47Z"
+		},
+		{
+			"checksumSHA1": "mGFkpEYZZQ0igghZDazS5xK59Do=",
+			"path": "github.com/hyperledger/fabric/core/ledger/statemgmt/raw",
+			"revision": "8002995147b6376f7fdb598f09831e7b413171e1",
+			"revisionTime": "2016-08-05T13:33:47Z"
+		},
+		{
+			"checksumSHA1": "Syc08HKyDPZBa1xEPNTDyXdcDlQ=",
+			"path": "github.com/hyperledger/fabric/core/ledger/statemgmt/state",
+			"revision": "8002995147b6376f7fdb598f09831e7b413171e1",
+			"revisionTime": "2016-08-05T13:33:47Z"
+		},
+		{
+			"checksumSHA1": "Zv371PaJ2cDdRmWWxui2rRvJvAs=",
+			"path": "github.com/hyperledger/fabric/core/ledger/statemgmt/trie",
+			"revision": "8002995147b6376f7fdb598f09831e7b413171e1",
+			"revisionTime": "2016-08-05T13:33:47Z"
+		},
+		{
+			"checksumSHA1": "RRXcrGl+tztwyw9eCAFvdFgYKmY=",
+			"path": "github.com/hyperledger/fabric/core/ledger/testutil",
+			"revision": "8002995147b6376f7fdb598f09831e7b413171e1",
+			"revisionTime": "2016-08-05T13:33:47Z"
+		},
+		{
+			"checksumSHA1": "fBm8An72HVGGU9EPZpEE1n1x440=",
+			"path": "github.com/hyperledger/fabric/core/ledger/util",
+			"revision": "8002995147b6376f7fdb598f09831e7b413171e1",
+			"revisionTime": "2016-08-05T13:33:47Z"
+		},
+		{
+			"checksumSHA1": "5ovyIsfh1gn+heSbnI2GrLT6l0A=",
+			"path": "github.com/hyperledger/fabric/core/util",
+			"revision": "8002995147b6376f7fdb598f09831e7b413171e1",
+			"revisionTime": "2016-08-05T13:33:47Z"
+		},
+		{
+			"checksumSHA1": "RL5ufKrMEmQU4cGQueJwF4nJp6k=",
+			"path": "github.com/hyperledger/fabric/events/producer",
+			"revision": "8002995147b6376f7fdb598f09831e7b413171e1",
+			"revisionTime": "2016-08-05T13:33:47Z"
+		},
+		{
+			"checksumSHA1": "S68e3SZPkuB7pzsZGhZ2L8DJpDQ=",
+			"path": "github.com/hyperledger/fabric/protos",
+			"revision": "8002995147b6376f7fdb598f09831e7b413171e1",
+			"revisionTime": "2016-08-05T13:33:47Z"
+		},
+		{
 			"checksumSHA1": "1YeGotQXMZMqk+mmm8sbBVJywpw=",
 			"path": "github.com/kr/pretty",
 			"revision": "e6ac2fc51e89a3249e82157fa0bb7a18ef9dd5bb",
@@ -151,6 +229,13 @@
 			"path": "google.golang.org/grpc/transport",
 			"revision": "f31066359017b605a0c7ad4d969508047a65a99b",
 			"revisionTime": "2015-09-26T00:27:42Z"
+		},
+		{
+			"checksumSHA1": "gbW0f3IRg4wsuHITKgfH+VsxWK0=",
+			"origin": "github.com/hyperledger/fabric/vendor/google/protobuf",
+			"path": "google/protobuf",
+			"revision": "8002995147b6376f7fdb598f09831e7b413171e1",
+			"revisionTime": "2016-08-05T13:33:47Z"
 		},
 		{
 			"checksumSHA1": "I2d7Kn572Fz02mnnlcI4MHXCu0c=",

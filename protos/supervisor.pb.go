@@ -199,7 +199,7 @@ func (m *FarmerPingRsp) GetBlocksRange() *BlocksRange {
 
 type FarmerConquerChallengeReq struct {
 	FarmerID    string       `protobuf:"bytes,1,opt,name=farmerID" json:"farmerID,omitempty"`
-	BlocksHash  []byte       `protobuf:"bytes,2,opt,name=blocksHash,proto3" json:"blocksHash,omitempty"`
+	BlocksHash  string       `protobuf:"bytes,2,opt,name=blocksHash" json:"blocksHash,omitempty"`
 	HashAlgo    HashAlgo     `protobuf:"varint,3,opt,name=hashAlgo,enum=protos.HashAlgo" json:"hashAlgo,omitempty"`
 	BlocksRange *BlocksRange `protobuf:"bytes,4,opt,name=blocksRange" json:"blocksRange,omitempty"`
 }
@@ -216,7 +216,8 @@ func (m *FarmerConquerChallengeReq) GetBlocksRange() *BlocksRange {
 }
 
 type FarmerConquerChallengeRsp struct {
-	Account *FarmerAccount `protobuf:"bytes,1,opt,name=account" json:"account,omitempty"`
+	Account   *FarmerAccount `protobuf:"bytes,1,opt,name=account" json:"account,omitempty"`
+	ConquerOK bool           `protobuf:"varint,2,opt,name=conquerOK" json:"conquerOK,omitempty"`
 }
 
 func (m *FarmerConquerChallengeRsp) Reset()         { *m = FarmerConquerChallengeRsp{} }
