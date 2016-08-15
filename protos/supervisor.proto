@@ -80,13 +80,14 @@ message FarmerPingRsp {
 
 message FarmerConquerChallengeReq {
     string farmerID = 1;
-    bytes blocksHash = 2;
+    string blocksHash = 2;
     HashAlgo hashAlgo = 3;
     BlocksRange blocksRange = 4;
 }
 
 message FarmerConquerChallengeRsp {
     FarmerAccount account = 1;
+    bool conquerOK = 2;
 }
 
 message FarmerOffLineReq {

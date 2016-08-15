@@ -22,13 +22,13 @@ import (
 )
 
 func (this *TestFarmerAccount) TestOnLine(c *check.C) {
-	handler := NewFarmerHandler("farmerId0001")
+	handler := NewFarmerHandler("TestOnLine")
 	c.Check(handler.OnLine(), check.IsNil)
 	c.Assert(handler.Account().State, check.Equals, pb.FarmerState_ONLINE)
 }
 
 func (this *TestFarmerAccount) TestLost(c *check.C) {
-	handler := NewFarmerHandler("farmerId0002")
+	handler := NewFarmerHandler("TestLost")
 	c.Check(handler.OnLine(), check.IsNil)
 	c.Assert(handler.Account().State, check.Equals, pb.FarmerState_ONLINE)
 
@@ -38,7 +38,7 @@ func (this *TestFarmerAccount) TestLost(c *check.C) {
 }
 
 func (this *TestFarmerAccount) TestOffLine(c *check.C) {
-	handler := NewFarmerHandler("farmerId0003")
+	handler := NewFarmerHandler("TestOffLine")
 	c.Check(handler.OnLine(), check.IsNil)
 	c.Assert(handler.Account().State, check.Equals, pb.FarmerState_ONLINE)
 
@@ -51,7 +51,7 @@ func (this *TestFarmerAccount) TestOffLine(c *check.C) {
 }
 
 func (this *TestFarmerAccount) TestChallengeHashAlgo(c *check.C) {
-	handler := NewFarmerHandler("farmerId0004")
+	handler := NewFarmerHandler("TestChallengeHashAlgo")
 
 	c.Assert(handler.ChallengeHashAlgo(), check.Equals, pb.HashAlgo_SHA256)
 

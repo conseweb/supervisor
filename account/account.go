@@ -132,19 +132,7 @@ func (this *FarmerAccountController) NewFarmerHandler(farmerId string) (handler 
 		"after_event": func(e *fsm.Event) {
 			handler.afterEvent(e)
 
-			this.l.Lock()
-			if farmerBytes, err := handler.marshal(); err == nil {
-				// save back 2 memory
-				if handler.account.State != pb.FarmerState_OFFLINE {
-					this.accountTree.Put(key, farmerBytes)
-				} else {
-					this.accountTree.Delete(key)
-				}
-
-				// save back 2 storage, async
-				go this.accountStorage.Set([]byte(key), farmerBytes)
-			}
-			this.l.Unlock()
+			this.UpdateFarmerHandler(handler)
 		},
 	})
 
@@ -184,8 +172,7 @@ func (this *FarmerAccountController) NewFarmerHandler(farmerId string) (handler 
 		if farmerBytes, err := handler.marshal(); err == nil {
 			// put into account tree
 			this.accountTree.Put(key, farmerBytes)
-			// put into account storage, async
-			go this.accountStorage.Set([]byte(key), farmerBytes)
+			this.asyncPersistFarmerBytes([]byte(key), farmerBytes)
 
 			// put handler'fsm into fsm's map
 			this.farmerFSMs[key] = handler.fsm
@@ -196,6 +183,27 @@ func (this *FarmerAccountController) NewFarmerHandler(farmerId string) (handler 
 	}
 }
 
+func UpdateFarmerHandler(handler *FarmerAccountHandler) {
+	getController().UpdateFarmerHandler(handler)
+}
+
+func (this *FarmerAccountController) UpdateFarmerHandler(handler *FarmerAccountHandler) {
+	key := farmerId2Key(handler.account.FarmerID)
+
+	this.l.Lock()
+	if farmerBytes, err := handler.marshal(); err == nil {
+		// save back 2 memory
+		if handler.account.State != pb.FarmerState_OFFLINE {
+			this.accountTree.Put(key, farmerBytes)
+		} else {
+			this.accountTree.Delete(key)
+		}
+
+		this.asyncPersistFarmerBytes([]byte(key), farmerBytes)
+	}
+	this.l.Unlock()
+}
+
 // close the backend storage
 func Close() error {
 	return getController().Close()
@@ -203,4 +211,9 @@ func Close() error {
 func (this *FarmerAccountController) Close() error {
 	this.farmerFSMs = nil
 	return this.accountStorage.Close()
+}
+
+func (this *FarmerAccountController) asyncPersistFarmerBytes(farmerKey, farmerBytes []byte) {
+	// save back 2 storage, async
+	go this.accountStorage.Set(farmerKey, farmerBytes)
 }

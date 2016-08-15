@@ -23,6 +23,7 @@ import (
 	"github.com/spf13/viper"
 	"math/rand"
 	"time"
+	"github.com/conseweb/supervisor/challenge"
 )
 
 type FarmerAccountHandler struct {
@@ -81,6 +82,21 @@ func (this *FarmerAccountHandler) Ping() error {
 	}
 
 	return nil
+}
+
+func (this *FarmerAccountHandler) ConquerChallenge(highBlockNumber, lowBlockNumber uint64, hashAlgo pb.HashAlgo, blocksHash string) error {
+	if challenge.ConquerChallenge(this.account.FarmerID, highBlockNumber, lowBlockNumber, hashAlgo, blocksHash) {
+		// TODO calc farmer balance
+		this.account.Balance += 100
+	} else {
+		this.account.Balance = 0
+	}
+
+	return nil
+}
+
+func (this *FarmerAccountHandler) balance() {
+
 }
 
 func (this *FarmerAccountHandler) Lost() error {

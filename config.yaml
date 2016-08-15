@@ -1,0 +1,59 @@
+########################################################################################################################
+#
+# supervisor configuation
+#
+########################################################################################################################
+
+######################################################################
+#
+# server section
+#
+######################################################################
+server:
+
+    # supervisor server version
+    version: 0.1.0
+
+######################################################################
+#
+# node section
+#
+######################################################################
+node:
+    # the address that the supervisor listenning on
+    address: 0.0.0.0:9376
+
+    # whether to trace RPCs using the golang.org/x/net/trace package
+    trace: true
+
+######################################################################
+#
+# account section
+#
+######################################################################
+account:
+
+    store:
+      # used for point out which storage backend be used, default is rocksdb
+      backend: rocksdb
+
+      # if backend is rocksdb, this section of conf is useful
+      rocksdb:
+        # where to store db file
+        dbpath: /tmp/trustchain/supervisor/account
+
+#####################################################################
+#
+# farmer section
+#
+#####################################################################
+farmer:
+    ping:
+      # interval of time, farmer call for heartbeat, default is 900(s)
+      interval: 900
+      # after certain times of lost, superviosr change farmer's state to OFFLINE
+      lostcount: 2
+
+    challenge:
+      # challenge hash algorithm, value can be MD5,SHA1,SHA224,SHA256,SHA384,SHA512,SHA3224,SHA3256,SHA3384,SHA3512
+      hashalgo: SHA256
