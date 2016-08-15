@@ -28,3 +28,6 @@ _testmain.go
 # bin file
 tcsv
 supervisor
+
+# test data
+testdata

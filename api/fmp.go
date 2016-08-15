@@ -19,36 +19,50 @@ import (
 	"github.com/conseweb/supervisor/account"
 	"github.com/conseweb/supervisor/challenge"
 	pb "github.com/conseweb/supervisor/protos"
+	"github.com/op/go-logging"
 	"golang.org/x/net/context"
+)
+
+// TODO vairfy farmerid
+
+var (
+	logger = logging.MustGetLogger("supervisor")
 )
 
 type FarmerPublic struct {
 }
 
 func (this *FarmerPublic) FarmerOnLine(ctx context.Context, req *pb.FarmerOnLineReq) (*pb.FarmerOnLineRsp, error) {
-	// TODO vairfy farmerid
+	logger.Debugf("new connect for FarmerOnLine, req: %+v", req)
 
+	rsp := &pb.FarmerOnLineRsp{
+		Error: pb.ResponseOK(),
+	}
 	handler := account.NewFarmerHandler(req.FarmerID)
 
 	// online
 	if err := handler.OnLine(); err != nil {
-		return nil, err
+		rsp.Error = pb.NewErrorf(pb.ErrorType_FARMER_ONLINE, "online return err: %v", err)
+		return rsp, nil
 	}
 
-	return &pb.FarmerOnLineRsp{
-		Account:  handler.Account(),
-		NextPing: handler.NextPingTime(),
-	}, nil
+	rsp.Account = handler.Account()
+	rsp.NextPing = handler.NextPingTime()
+
+	return rsp, nil
 }
 
 func (this *FarmerPublic) FarmerPing(ctx context.Context, req *pb.FarmerPingReq) (*pb.FarmerPingRsp, error) {
-	// TODO vairfy farmerid
-	handler := account.NewFarmerHandler(req.FarmerID)
-	rsp := &pb.FarmerPingRsp{}
+	logger.Debugf("new connect for FarmerPing, req: %+v", req)
 
-	// online event
-	if err := handler.OnLine(); err != nil {
-		return nil, err
+	rsp := &pb.FarmerPingRsp{
+		Error: pb.ResponseOK(),
+	}
+	handler := account.NewFarmerHandler(req.FarmerID)
+
+	if err := handler.Ping(); err != nil {
+		rsp.Error = pb.NewError(pb.ErrorType_FARMER_ONLINE, err.Error())
+		return rsp, nil
 	}
 
 	// need challenge
@@ -69,32 +83,41 @@ func (this *FarmerPublic) FarmerPing(ctx context.Context, req *pb.FarmerPingReq)
 }
 
 func (this *FarmerPublic) FarmerConquerChallenge(ctx context.Context, req *pb.FarmerConquerChallengeReq) (*pb.FarmerConquerChallengeRsp, error) {
-	handler := account.NewFarmerHandler(req.FarmerID)
+	logger.Debugf("new connect for FarmerConquerChallenge, req: %+v", req)
+
 	rsp := &pb.FarmerConquerChallengeRsp{
-		Account: handler.Account(),
+		Error: pb.ResponseOK(),
 	}
+	handler := account.NewFarmerHandler(req.FarmerID)
 
 	if err := handler.ConquerChallenge(req.BlocksRange.HighBlockNumber, req.BlocksRange.LowBlockNumber, req.HashAlgo, req.BlocksHash); err != nil {
 		rsp.ConquerOK = false
-		return rsp, err
+		rsp.Error = pb.NewErrorf(pb.ErrorType_FARMER_CHALLENGE_FAIL, "challenge fail: %v", err)
+
+		return rsp, nil
 	}
-	account.UpdateFarmerHandler(handler)
 
 	rsp.ConquerOK = true
+	rsp.Account = handler.Account()
+
 	return rsp, nil
 }
 
 func (this *FarmerPublic) FarmerOffLine(ctx context.Context, req *pb.FarmerOffLineReq) (*pb.FarmerOffLineRsp, error) {
+	logger.Debugf("new connect for FarmerOffLine, req: %+v", req)
 
-	// TODO varify farmer id
+	rsp := &pb.FarmerOffLineRsp{
+		Error: pb.ResponseOK(),
+	}
 	handler := account.NewFarmerHandler(req.FarmerID)
 
 	// offline event
 	if err := handler.OffLine(); err != nil {
-		return nil, err
+		rsp.Error = pb.NewErrorf(pb.ErrorType_FARMER_OFFLINE, "offline err: %v", err)
+		return rsp, nil
 	}
 
-	return &pb.FarmerOffLineRsp{
-		Account: handler.Account(),
-	}, nil
+	rsp.Account = handler.Account()
+
+	return rsp, nil
 }

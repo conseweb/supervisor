@@ -17,13 +17,13 @@ package account
 
 import (
 	"errors"
+	"github.com/conseweb/supervisor/challenge"
 	pb "github.com/conseweb/supervisor/protos"
 	"github.com/golang/protobuf/proto"
 	"github.com/looplab/fsm"
 	"github.com/spf13/viper"
 	"math/rand"
 	"time"
-	"github.com/conseweb/supervisor/challenge"
 )
 
 type FarmerAccountHandler struct {
@@ -35,6 +35,8 @@ type FarmerAccountHandler struct {
 
 // whether or not need challenge blocks hash
 func (this *FarmerAccountHandler) NeedChallengeBlocks(highBlockNumber, lowBlockBumber uint64) (need bool, brange *pb.BlocksRange) {
+	brange = &pb.BlocksRange{}
+
 	need = (rand.Int() % 2) == 0
 	if need {
 		if highBlockNumber < lowBlockBumber {
@@ -59,11 +61,38 @@ func (this *FarmerAccountHandler) ChallengeHashAlgo() pb.HashAlgo {
 
 // randomly return next ping time
 func (this *FarmerAccountHandler) NextPingTime() int64 {
+	if this.nextPingTime <= 0 {
+		this.nextPingTime = time.Now().Add(nextPingInterval()).UnixNano()
+	}
+
 	return this.nextPingTime
 }
 
 func (this *FarmerAccountHandler) Account() *pb.FarmerAccount {
+	if this.account == nil {
+		return nil
+	}
 	return this.account
+}
+
+// after online, we set farmer's lost count 0
+func (this *FarmerAccountHandler) afterEvent() {
+	this.account.LastModifiedTime = time.Now().UnixNano()
+	this.account.State = pb.FarmerState(pb.FarmerState_value[this.fsm.Current()])
+
+	time.AfterFunc(nextPingInterval(), func() {
+		this.lostCount++
+		if this.fsm.Can("lost") {
+			this.Lost()
+		}
+		if this.lostCount >= viper.GetInt("farmer.ping.lostcount") {
+			if this.fsm.Can("offline") {
+				this.OffLine()
+			}
+		}
+	})
+
+	UpdateFarmerHandler(this)
 }
 
 func (this *FarmerAccountHandler) OnLine() error {
@@ -72,14 +101,19 @@ func (this *FarmerAccountHandler) OnLine() error {
 		return err
 	}
 
+	this.lostCount = 0
+	this.afterEvent()
+
 	return nil
 }
 
 func (this *FarmerAccountHandler) Ping() error {
-	if err := this.fsm.Event("ping"); err != nil {
-		logger.Errorf("farmer ping return err: %v", err)
-		return err
+	if this.fsm.Current() == pb.FarmerState_OFFLINE.String() {
+		return errors.New("farmer is offline")
 	}
+
+	this.lostCount = 0
+	this.afterEvent()
 
 	return nil
 }
@@ -90,7 +124,12 @@ func (this *FarmerAccountHandler) ConquerChallenge(highBlockNumber, lowBlockNumb
 		this.account.Balance += 100
 	} else {
 		this.account.Balance = 0
+		return errors.New("farmer conquer challenge fail")
 	}
+
+	this.lostCount = 0
+	this.account.LastChallengeTime = time.Now().UnixNano()
+	this.afterEvent()
 
 	return nil
 }
@@ -109,6 +148,8 @@ func (this *FarmerAccountHandler) Lost() error {
 		return err
 	}
 
+	this.afterEvent()
+
 	return nil
 }
 
@@ -118,35 +159,14 @@ func (this *FarmerAccountHandler) OffLine() error {
 		return err
 	}
 
+	this.lostCount = 0
+	this.afterEvent()
+
 	return nil
 }
 
 func (this *FarmerAccountHandler) beforeEvent(e *fsm.Event) {
 	logger.Debugf("farmer(%v) do event(%v) from state %v enter state %v", this.account.FarmerID, e.Event, e.Src, e.Dst)
-}
-
-// after online, we set farmer's lost count 0
-func (this *FarmerAccountHandler) afterOnLine() {
-	npInterval := nextPingInterval()
-	this.lostCount = 0
-	this.nextPingTime = time.Now().Add(npInterval).UnixNano()
-
-	time.AfterFunc(npInterval, func() {
-		this.lostCount++
-		if this.fsm.Can("lost") {
-			this.Lost()
-		}
-		if this.lostCount >= viper.GetInt("farmer.ping.lostcount") {
-			if this.fsm.Can("offline") {
-				this.OffLine()
-			}
-		}
-	})
-}
-
-func (this *FarmerAccountHandler) afterEvent(e *fsm.Event) {
-	this.account.LastModifiedTime = time.Now().UnixNano()
-	this.account.State = pb.FarmerState(pb.FarmerState_value[e.Dst])
 }
 
 // TODO change farmerid 2 backend uniquekey

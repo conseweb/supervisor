@@ -30,16 +30,26 @@ const (
 )
 
 var (
-	logger = logging.MustGetLogger("main")
+	logger = logging.MustGetLogger("supervisor")
 
 	app = kingpin.New(appName, "A command-line trust-chain supervisor cli.")
 
 	svnode = app.Command("node", "Supervisor Node")
 )
 
-func main() {
+func init() {
 	// load configure
 	loadConfigure()
+
+	level, err := logging.LogLevel(viper.GetString("server.logging"))
+	if err != nil {
+		logger.Fatalf("set logging level err: %v", level)
+	}
+
+	logging.SetLevel(level, "supervisor")
+}
+
+func main() {
 
 	app.Version(viper.GetString("server.version"))
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {

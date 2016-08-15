@@ -18,10 +18,12 @@ package node
 import (
 	"github.com/conseweb/supervisor/account"
 	"github.com/conseweb/supervisor/api"
+	"github.com/conseweb/supervisor/challenge"
 	pb "github.com/conseweb/supervisor/protos"
 	"github.com/op/go-logging"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"net"
 	"os"
 	"os/signal"
@@ -33,7 +35,7 @@ const (
 )
 
 var (
-	logger = logging.MustGetLogger("supervisor/node")
+	logger = logging.MustGetLogger("supervisor")
 	server *grpc.Server
 )
 
@@ -55,11 +57,19 @@ func StartNode() {
 	}
 
 	grpc.EnableTracing = viper.GetBool("node.trace")
-	server = grpc.NewServer()
+	logger.Infof("grpc.EnableTracing: %v", grpc.EnableTracing)
+
+	opts := []grpc.ServerOption{}
+	if viper.GetBool("node.tls.enabled") {
+		opts = append(opts, grpc.Creds(initTLSForServer()))
+	}
+	server = grpc.NewServer(opts...)
+
+	// register
 	pb.RegisterFarmerPublicServer(server, &api.FarmerPublic{})
 
-	logger.Infof("supervisor node listening on %s, waiting for connect...", addr)
 	go server.Serve(lis)
+	logger.Infof("supervisor node listening on %s, waiting for connect...", addr)
 
 	HandleNodeSignal()
 }
@@ -68,6 +78,8 @@ func StartNode() {
 func StopNode() {
 	server.GracefulStop()
 	account.Close()
+	challenge.GetFarmerChallengeReqCache().Close()
+	challenge.GetBlocksHashCache().Close()
 }
 
 func HandleNodeSignal() {
@@ -89,4 +101,15 @@ func HandleNodeSignal() {
 			os.Exit(0)
 		}
 	}
+}
+
+// InitTLSForServer returns TLS credentials for node
+func initTLSForServer() credentials.TransportCredentials {
+	creds, err := credentials.NewServerTLSFromFile(viper.GetString("node.tls.cert.file"), viper.GetString("node.tls.key.file"))
+	if err != nil {
+		logger.Errorf("Failed to create TLS credentials %v", err)
+		creds = credentials.NewServerTLSFromCert(nil)
+	}
+
+	return creds
 }
