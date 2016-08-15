@@ -16,6 +16,7 @@ limitations under the License.
 package node
 
 import (
+	"github.com/conseweb/supervisor/account"
 	"github.com/conseweb/supervisor/api"
 	pb "github.com/conseweb/supervisor/protos"
 	"github.com/op/go-logging"
@@ -66,6 +67,7 @@ func StartNode() {
 // stop node
 func StopNode() {
 	server.GracefulStop()
+	account.Close()
 }
 
 func HandleNodeSignal() {
