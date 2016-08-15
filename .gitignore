@@ -24,3 +24,10 @@ _testmain.go
 *.prof
 
 .DS_Store
+
+# bin file
+tcsv
+supervisor
+
+# test data
+testdata

@@ -23,6 +23,18 @@ message FarmerAccount {
     int64 lastChallengeTime = 5;
 }
 
+enum ErrorType {
+    NONE_ERROR = 0;
+    FARMER_ONLINE = 1;
+    FARMER_OFFLINE = 2;
+    FARMER_CHALLENGE_FAIL = 3;
+}
+
+message Error {
+    ErrorType errorType = 1;
+    string message = 2;
+}
+
 // farmer client can use the service to communicate with supervisor
 service FarmerPublic {
     // when farmer lanch the cli(peer), it will call for notice supervisor that I'm online
@@ -43,8 +55,9 @@ message FarmerOnLineReq {
 }
 
 message FarmerOnLineRsp {
-    FarmerAccount account = 1;
-    int64 nextPing = 2;
+    Error error = 1;
+    FarmerAccount account = 2;
+    int64 nextPing = 3;
 }
 
 message BlocksRange {
@@ -71,11 +84,12 @@ enum HashAlgo {
 }
 
 message FarmerPingRsp {
-    FarmerAccount account = 1;
-    bool needChallenge = 2;
-    HashAlgo hashAlgo = 3;
-    BlocksRange blocksRange = 4;
-    int64 nextPing = 5;
+    Error error = 1;
+    FarmerAccount account = 2;
+    bool needChallenge = 3;
+    HashAlgo hashAlgo = 4;
+    BlocksRange blocksRange = 5;
+    int64 nextPing = 6;
 }
 
 message FarmerConquerChallengeReq {
@@ -86,8 +100,9 @@ message FarmerConquerChallengeReq {
 }
 
 message FarmerConquerChallengeRsp {
-    FarmerAccount account = 1;
-    bool conquerOK = 2;
+    Error error = 1;
+    FarmerAccount account = 2;
+    bool conquerOK = 3;
 }
 
 message FarmerOffLineReq {
@@ -95,5 +110,6 @@ message FarmerOffLineReq {
 }
 
 message FarmerOffLineRsp {
-    FarmerAccount account = 1;
+    Error error = 1;
+    FarmerAccount account = 2;
 }

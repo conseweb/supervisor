@@ -13,6 +13,8 @@ server:
 
     # supervisor server version
     version: 0.1.0
+    # logging level
+    logging: debug
 
 ######################################################################
 #
@@ -25,6 +27,16 @@ node:
 
     # whether to trace RPCs using the golang.org/x/net/trace package
     trace: true
+
+    tls:
+      # whether or not to setup tls connection
+      enabled: false
+      cert:
+        file: testdata/server1.pem
+      key:
+        file: testdata/server1.key
+      # The server name use to verify the hostname returned by TLS handshake
+      serverhostoverride:
 
 ######################################################################
 #
@@ -40,7 +52,7 @@ account:
       # if backend is rocksdb, this section of conf is useful
       rocksdb:
         # where to store db file
-        dbpath: /tmp/trustchain/supervisor/account
+        dbpath: ./testdata/trustchain/supervisor/account
 
 #####################################################################
 #

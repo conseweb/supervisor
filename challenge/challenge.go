@@ -26,7 +26,7 @@ import (
 )
 
 var (
-	logger         = logging.MustGetLogger("supervisor/challenge")
+	logger         = logging.MustGetLogger("supervisor")
 	ErrOutOfBounds = errors.New("supervisor/challenge: blocks out of bounds")
 )
 
@@ -45,7 +45,6 @@ func ConquerChallenge(farmerId string, highBlockNumber, lowBlockNumber uint64, h
 	// get blocks hash from blocks hash cache, if not found, just hash it and put it into cache
 	originalHash, get := GetBlocksHashCache().GetFromBlocksHashCache(highBlockNumber, lowBlockNumber, hashAlgo)
 	if !get {
-
 		blocksBytes, err := GetBlocksBytes(highBlockNumber, lowBlockNumber)
 		if err != nil {
 			logger.Errorf("get blocks[%d, %d] bytes err: %v", highBlockNumber, lowBlockNumber, err)
@@ -56,14 +55,18 @@ func ConquerChallenge(farmerId string, highBlockNumber, lowBlockNumber uint64, h
 	}
 
 	// compare farmer result & sv result
-	if strings.Compare(blocksHash, FarmerConquerHash(farmerId, hashAlgo, originalHash)) != 0 {
+	serverHash := FarmerBindConquerHash(farmerId, hashAlgo, originalHash)
+	if strings.Compare(blocksHash, serverHash) != 0 {
+		logger.Warningf("farmer[%s] conquer challenge fail, farmer hash: %s, server hash: %s",farmerId, blocksHash, serverHash)
 		return false
 	}
+	logger.Debugf("farmer[%s] conquer challenge success.", farmerId)
 
 	return true
 }
 
-func FarmerConquerHash(farmerId string, hashAlgo pb.HashAlgo, originalHash string) string {
+// compare hash isn't hash of blocks, is hash of (farmerId string and hash of blocks's string)
+func FarmerBindConquerHash(farmerId string, hashAlgo pb.HashAlgo, originalHash string) string {
 	return HASH(hashAlgo, bytes.NewBufferString(fmt.Sprintf("%s%s", originalHash, farmerId)).Bytes())
 }
 

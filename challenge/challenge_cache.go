@@ -28,6 +28,7 @@ type FarmerChallengeCache interface {
 	SetFarmerChallengeReq(farmerId string, highBlockNumber, lowBlockNumber uint64, hashAlgo pb.HashAlgo) bool
 	GetFarmerChallengeReq(farmerId string, highBlockNumber, lowBlockNumber uint64, hashAlgo pb.HashAlgo) (*FarmerChallengeReq, bool)
 	DelFarmerChallengeReq(farmerId string, highBlockNumber, lowBlockNumber uint64, hashAlgo pb.HashAlgo)
+	Close() error
 }
 
 type defaultFarmerChallengeReqCache struct {
@@ -81,6 +82,11 @@ func (this *defaultFarmerChallengeReqCache) DelFarmerChallengeReq(farmerId strin
 	key := this.cachekey(farmerId, highBlockNumber, lowBlockNumber, hashAlgo)
 
 	delete(this.caches, key)
+}
+
+func (this *defaultFarmerChallengeReqCache) Close() error {
+	this.caches = nil
+	return nil
 }
 
 func newDefaultFarmerChallengeReqCache() FarmerChallengeCache {

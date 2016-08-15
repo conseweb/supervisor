@@ -37,7 +37,7 @@ var (
 )
 
 func init() {
-	logger = logging.MustGetLogger("supervisor/account")
+	logger = logging.MustGetLogger("supervisor")
 	once = &sync.Once{}
 }
 
@@ -95,6 +95,10 @@ func NewFarmerHandler(farmerId string) (handler *FarmerAccountHandler) {
 	return getController().NewFarmerHandler(farmerId)
 }
 func (this *FarmerAccountController) NewFarmerHandler(farmerId string) (handler *FarmerAccountHandler) {
+	defer func() {
+		logger.Debugf("farmer: %+v", handler.Account())
+	}()
+
 	key := farmerId2Key(farmerId)
 	handler = &FarmerAccountHandler{}
 
@@ -106,12 +110,13 @@ func (this *FarmerAccountController) NewFarmerHandler(farmerId string) (handler 
 		if err == nil {
 			// means farmer already in memory(tree), setup a farmer account handler
 			this.l.RLock()
-			fsm, ok := this.farmerFSMs[key]
+			existFsm, ok := this.farmerFSMs[key]
 			this.l.RUnlock()
 
 			if ok {
 				if handler.unmarshal(farmerBytes) == nil {
-					handler.fsm = fsm
+					handler.fsm = existFsm
+					handler.account.State = pb.FarmerState(pb.FarmerState_value[handler.fsm.Current()])
 					return
 				}
 			}
@@ -126,14 +131,6 @@ func (this *FarmerAccountController) NewFarmerHandler(farmerId string) (handler 
 		"before_event": func(e *fsm.Event) {
 			handler.beforeEvent(e)
 		},
-		"after_online": func(e *fsm.Event) {
-			handler.afterOnLine()
-		},
-		"after_event": func(e *fsm.Event) {
-			handler.afterEvent(e)
-
-			this.UpdateFarmerHandler(handler)
-		},
 	})
 
 	// 2. looking farmer from storage, if found, put into account tree, and create fsm
@@ -142,18 +139,22 @@ func (this *FarmerAccountController) NewFarmerHandler(farmerId string) (handler 
 		farmerBytes, err := this.accountStorage.Get([]byte(key))
 		this.l.RUnlock()
 		if err == nil {
-			this.l.Lock()
 			if handler.unmarshal(farmerBytes) == nil {
 				handler.fsm = tmpFsm
+				handler.account.State = pb.FarmerState(pb.FarmerState_value[handler.fsm.Current()])
 
-				// put into account tree
-				this.accountTree.Put(key, farmerBytes)
-				// put handler'fsm into fsm's map
-				this.farmerFSMs[key] = handler.fsm
+				if newFarmerBytes, err := handler.marshal(); err == nil {
+					this.l.Lock()
+					// put into account tree
+					this.accountTree.Put(key, newFarmerBytes)
+
+					// put handler'fsm into fsm's map
+					this.farmerFSMs[key] = handler.fsm
+					this.l.Unlock()
+
+					return
+				}
 			}
-			this.l.Unlock()
-
-			return
 		}
 	}
 
@@ -210,6 +211,7 @@ func Close() error {
 }
 func (this *FarmerAccountController) Close() error {
 	this.farmerFSMs = nil
+	this.accountTree = nil
 	return this.accountStorage.Close()
 }
 

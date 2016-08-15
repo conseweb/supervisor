@@ -24,6 +24,7 @@ import (
 type BlocksHashCache interface {
 	GetFromBlocksHashCache(highBlockNumber, lowBlockBumber uint64, hashAlgo pb.HashAlgo) (string, bool)
 	SetBlocksHashToCache(highBlockNumber, lowBlockBumber uint64, hashAlgo pb.HashAlgo, hash string) bool
+	Close() error
 }
 
 type defaultBlocksHashCache struct {
@@ -67,6 +68,11 @@ func (this *defaultBlocksHashCache) SetBlocksHashToCache(highBlockNumber, lowBlo
 	}
 
 	return false
+}
+
+func (this *defaultBlocksHashCache) Close() error {
+	this.caches = nil
+	return nil
 }
 
 func (this *defaultBlocksHashCache) blocksHashCacheKey(highBlockNumber, lowBlockBumber uint64, hashAlgo pb.HashAlgo) string {
