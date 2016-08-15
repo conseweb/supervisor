@@ -20,7 +20,7 @@ import (
 	"errors"
 	"fmt"
 	pb "github.com/conseweb/supervisor/protos"
-	"github.com/hyperledger/fabric/core/ledger"
+	//"github.com/hyperledger/fabric/core/ledger"
 	"github.com/op/go-logging"
 	"strings"
 )
@@ -64,54 +64,56 @@ func ConquerChallenge(farmerId string, highBlockNumber, lowBlockNumber uint64, h
 }
 
 func FarmerConquerHash(farmerId string, hashAlgo pb.HashAlgo, originalHash string) string {
-	return HASH(hashAlgo, bytes.NewBufferString(fmt.Sprintf("%s%s", originalHash, farmerId)))
+	return HASH(hashAlgo, bytes.NewBufferString(fmt.Sprintf("%s%s", originalHash, farmerId)).Bytes())
 }
 
 func GetBlocksBytes(highBlockNumber, lowBlockNumber uint64) ([]byte, error) {
-	blocksBuffer := bytes.NewBufferString("")
-	ldg, err := ledger.GetLedger()
-	if err != nil {
-		return blocksBuffer.Bytes(), err
-	}
+	return []byte(""), nil
 
-	if highBlockNumber >= ldg.GetBlockchainSize() {
-		return blocksBuffer.Bytes(), ErrOutOfBounds
-	}
-	if highBlockNumber < lowBlockNumber {
-		return blocksBuffer.Bytes(), ErrOutOfBounds
-	}
-
-	currentBlock, err := ldg.GetBlockByNumber(highBlockNumber)
-	if err != nil {
-		return blocksBuffer.Bytes(), fmt.Errorf("Error fetching block %d.", highBlockNumber)
-	}
-	if currentBlock == nil {
-		return blocksBuffer.Bytes(), fmt.Errorf("Block %d is nil.", highBlockNumber)
-	}
-
-	for i := highBlockNumber; i > lowBlockNumber; i-- {
-		previousBlock, err := ldg.GetBlockByNumber(i - 1)
-		if err != nil {
-			return blocksBuffer.Bytes(), err
-		}
-		if previousBlock == nil {
-			return blocksBuffer.Bytes(), fmt.Errorf("Block %d is nil.", i)
-		}
-		previousBlockHash, err := previousBlock.GetHash()
-		if err != nil {
-			return blocksBuffer.Bytes(), err
-		}
-		if bytes.Compare(previousBlockHash, currentBlock.PreviousBlockHash) != 0 {
-			return blocksBuffer.Bytes(), fmt.Errorf("Blocks hash can not match.")
-		}
-
-		if currentBlockBytes, err := currentBlock.Bytes(); err != nil {
-			return blocksBuffer.Bytes(), err
-		} else {
-			blocksBuffer.Write(currentBlockBytes)
-		}
-		currentBlock = previousBlock
-	}
-
-	return blocksBuffer.Bytes(), nil
+	//blocksBuffer := bytes.NewBufferString("")
+	//ldg, err := ledger.GetLedger()
+	//if err != nil {
+	//	return blocksBuffer.Bytes(), err
+	//}
+	//
+	//if highBlockNumber >= ldg.GetBlockchainSize() {
+	//	return blocksBuffer.Bytes(), ErrOutOfBounds
+	//}
+	//if highBlockNumber < lowBlockNumber {
+	//	return blocksBuffer.Bytes(), ErrOutOfBounds
+	//}
+	//
+	//currentBlock, err := ldg.GetBlockByNumber(highBlockNumber)
+	//if err != nil {
+	//	return blocksBuffer.Bytes(), fmt.Errorf("Error fetching block %d.", highBlockNumber)
+	//}
+	//if currentBlock == nil {
+	//	return blocksBuffer.Bytes(), fmt.Errorf("Block %d is nil.", highBlockNumber)
+	//}
+	//
+	//for i := highBlockNumber; i > lowBlockNumber; i-- {
+	//	previousBlock, err := ldg.GetBlockByNumber(i - 1)
+	//	if err != nil {
+	//		return blocksBuffer.Bytes(), err
+	//	}
+	//	if previousBlock == nil {
+	//		return blocksBuffer.Bytes(), fmt.Errorf("Block %d is nil.", i)
+	//	}
+	//	previousBlockHash, err := previousBlock.GetHash()
+	//	if err != nil {
+	//		return blocksBuffer.Bytes(), err
+	//	}
+	//	if bytes.Compare(previousBlockHash, currentBlock.PreviousBlockHash) != 0 {
+	//		return blocksBuffer.Bytes(), fmt.Errorf("Blocks hash can not match.")
+	//	}
+	//
+	//	if currentBlockBytes, err := currentBlock.Bytes(); err != nil {
+	//		return blocksBuffer.Bytes(), err
+	//	} else {
+	//		blocksBuffer.Write(currentBlockBytes)
+	//	}
+	//	currentBlock = previousBlock
+	//}
+	//
+	//return blocksBuffer.Bytes(), nil
 }

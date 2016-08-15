@@ -94,6 +94,7 @@ var (
 	challengeOnce           *sync.Once
 )
 
+// now just using the default farmer challenge request cache
 func GetFarmerChallengeReqCache() FarmerChallengeCache {
 	challengeOnce.Do(func() {
 		farmerChallengeReqCache = newDefaultFarmerChallengeReqCache()

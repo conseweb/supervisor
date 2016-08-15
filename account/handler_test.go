@@ -19,7 +19,6 @@ import (
 	pb "github.com/conseweb/supervisor/protos"
 	"github.com/spf13/viper"
 	"gopkg.in/check.v1"
-	"github.com/conseweb/supervisor/challenge"
 )
 
 func (this *TestFarmerAccount) TestOnLine(c *check.C) {
@@ -59,12 +58,4 @@ func (this *TestFarmerAccount) TestChallengeHashAlgo(c *check.C) {
 	viper.Set("farmer.challenge.hashalgo", "SHA512")
 	c.Assert(handler.ChallengeHashAlgo(), check.Not(check.Equals), pb.HashAlgo_SHA256)
 	c.Assert(handler.ChallengeHashAlgo(), check.Equals, pb.HashAlgo_SHA512)
-}
-
-func (this *TestFarmerAccount) TestConquerChallenge(c *check.C) {
-	c.Skip("no blocks")
-	handler := NewFarmerHandler("TestConquerChallenge")
-
-	challenge.GetFarmerChallengeReqCache().SetFarmerChallengeReq("TestConquerChallenge", 100, 20, pb.HashAlgo_SHA256)
-	c.Check(handler.ConquerChallenge(100, 20, pb.HashAlgo_SHA256, challenge.FarmerConquerHash("TestConquerChallenge", pb.HashAlgo_SHA256, challenge.HASH(pb.HashAlgo_SHA256, []byte("")))), check.IsNil)
 }

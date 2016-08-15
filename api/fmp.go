@@ -22,10 +22,10 @@ import (
 	"golang.org/x/net/context"
 )
 
-type fmp struct {
+type FarmerPublic struct {
 }
 
-func (this *fmp) FarmerOnLine(ctx context.Context, req *pb.FarmerOnLineReq) (*pb.FarmerOnLineRsp, error) {
+func (this *FarmerPublic) FarmerOnLine(ctx context.Context, req *pb.FarmerOnLineReq) (*pb.FarmerOnLineRsp, error) {
 	// TODO vairfy farmerid
 
 	handler := account.NewFarmerHandler(req.FarmerID)
@@ -41,7 +41,7 @@ func (this *fmp) FarmerOnLine(ctx context.Context, req *pb.FarmerOnLineReq) (*pb
 	}, nil
 }
 
-func (this *fmp) FarmerPing(ctx context.Context, req *pb.FarmerPingReq) (*pb.FarmerPingRsp, error) {
+func (this *FarmerPublic) FarmerPing(ctx context.Context, req *pb.FarmerPingReq) (*pb.FarmerPingRsp, error) {
 	// TODO vairfy farmerid
 	handler := account.NewFarmerHandler(req.FarmerID)
 	rsp := &pb.FarmerPingRsp{}
@@ -68,7 +68,7 @@ func (this *fmp) FarmerPing(ctx context.Context, req *pb.FarmerPingReq) (*pb.Far
 	return rsp, nil
 }
 
-func (this *fmp) FarmerConquerChallenge(ctx context.Context, req *pb.FarmerConquerChallengeReq) (*pb.FarmerConquerChallengeRsp, error) {
+func (this *FarmerPublic) FarmerConquerChallenge(ctx context.Context, req *pb.FarmerConquerChallengeReq) (*pb.FarmerConquerChallengeRsp, error) {
 	handler := account.NewFarmerHandler(req.FarmerID)
 	rsp := &pb.FarmerConquerChallengeRsp{
 		Account: handler.Account(),
@@ -84,7 +84,7 @@ func (this *fmp) FarmerConquerChallenge(ctx context.Context, req *pb.FarmerConqu
 	return rsp, nil
 }
 
-func (this *fmp) FarmerOffLine(ctx context.Context, req *pb.FarmerOffLineReq) (*pb.FarmerOffLineRsp, error) {
+func (this *FarmerPublic) FarmerOffLine(ctx context.Context, req *pb.FarmerOffLineReq) (*pb.FarmerOffLineRsp, error) {
 
 	// TODO varify farmer id
 	handler := account.NewFarmerHandler(req.FarmerID)

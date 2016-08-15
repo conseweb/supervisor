@@ -95,6 +95,10 @@ func (this *FarmerAccountHandler) ConquerChallenge(highBlockNumber, lowBlockNumb
 	return nil
 }
 
+func (this *FarmerAccountHandler) balance() {
+
+}
+
 func (this *FarmerAccountHandler) Lost() error {
 	if this.lostCount <= 0 {
 		return errors.New("current lost count <= 0")
