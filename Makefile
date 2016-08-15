@@ -9,10 +9,17 @@ test:
 	 --name supervisor-testing \
 	 -v $(PWD):/go/src/$(PKG) \
 	 -w /go/src/$(PKG) \
-	 ckeyer/obc:base make testInner
+	 ckeyer/obc:dev make testInner
 
 testInner: 
 	go test -ldflags="$(LD_FLAGS)" $$(go list ./... |grep -v "vendor")
 
 integration-test:
 	# TODO
+
+protoc:
+	docker run --rm \
+	 --name supervisor-testing \
+	 -v $(PWD):/go/src/$(PKG) \
+	 -w /go/src/$(PKG) \
+	 ckeyer/obc:dev tools/compile_protos.sh
