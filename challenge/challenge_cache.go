@@ -20,7 +20,6 @@ import (
 	"sync"
 
 	pb "github.com/conseweb/supervisor/protos"
-	"github.com/globalways/common/logger"
 )
 
 // once a farmer required to challenge the blocks hash,

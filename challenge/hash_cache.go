@@ -20,7 +20,6 @@ import (
 	"sync"
 
 	pb "github.com/conseweb/supervisor/protos"
-	"github.com/globalways/common/logger"
 )
 
 type BlocksHashCache interface {
