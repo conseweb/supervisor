@@ -17,7 +17,6 @@ package account
 
 import (
 	pb "github.com/conseweb/supervisor/protos"
-	"github.com/spf13/viper"
 	"gopkg.in/check.v1"
 )
 
@@ -48,14 +47,4 @@ func (this *TestFarmerAccount) TestOffLine(c *check.C) {
 
 	c.Check(handler.OffLine(), check.IsNil)
 	c.Assert(handler.Account().State, check.Equals, pb.FarmerState_OFFLINE)
-}
-
-func (this *TestFarmerAccount) TestChallengeHashAlgo(c *check.C) {
-	handler := NewFarmerHandler("TestChallengeHashAlgo")
-
-	c.Assert(handler.ChallengeHashAlgo(), check.Equals, pb.HashAlgo_SHA256)
-
-	viper.Set("farmer.challenge.hashalgo", "SHA512")
-	c.Assert(handler.ChallengeHashAlgo(), check.Not(check.Equals), pb.HashAlgo_SHA256)
-	c.Assert(handler.ChallengeHashAlgo(), check.Equals, pb.HashAlgo_SHA512)
 }

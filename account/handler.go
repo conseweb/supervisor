@@ -124,7 +124,7 @@ func (this *FarmerAccountHandler) Ping(highBlockNumber, lowBlockNumber uint64) (
 	this.lostCount = 0
 	this.afterEvent()
 
-	return nil
+	return
 }
 
 func (this *FarmerAccountHandler) ConquerChallenge(highBlockNumber, lowBlockNumber uint64, hashAlgo pb.HashAlgo, blocksHash string) error {

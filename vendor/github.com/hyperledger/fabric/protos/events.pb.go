@@ -43,6 +43,7 @@ var EventType_value = map[string]int32{
 func (x EventType) String() string {
 	return proto.EnumName(EventType_name, int32(x))
 }
+func (EventType) EnumDescriptor() ([]byte, []int) { return fileDescriptor4, []int{0} }
 
 // ChaincodeReg is used for registering chaincode Interests
 // when EventType is CHAINCODE
@@ -51,9 +52,10 @@ type ChaincodeReg struct {
 	EventName   string `protobuf:"bytes,2,opt,name=eventName" json:"eventName,omitempty"`
 }
 
-func (m *ChaincodeReg) Reset()         { *m = ChaincodeReg{} }
-func (m *ChaincodeReg) String() string { return proto.CompactTextString(m) }
-func (*ChaincodeReg) ProtoMessage()    {}
+func (m *ChaincodeReg) Reset()                    { *m = ChaincodeReg{} }
+func (m *ChaincodeReg) String() string            { return proto.CompactTextString(m) }
+func (*ChaincodeReg) ProtoMessage()               {}
+func (*ChaincodeReg) Descriptor() ([]byte, []int) { return fileDescriptor4, []int{0} }
 
 type Interest struct {
 	EventType EventType `protobuf:"varint,1,opt,name=eventType,enum=protos.EventType" json:"eventType,omitempty"`
@@ -67,9 +69,10 @@ type Interest struct {
 	RegInfo isInterest_RegInfo `protobuf_oneof:"RegInfo"`
 }
 
-func (m *Interest) Reset()         { *m = Interest{} }
-func (m *Interest) String() string { return proto.CompactTextString(m) }
-func (*Interest) ProtoMessage()    {}
+func (m *Interest) Reset()                    { *m = Interest{} }
+func (m *Interest) String() string            { return proto.CompactTextString(m) }
+func (*Interest) ProtoMessage()               {}
+func (*Interest) Descriptor() ([]byte, []int) { return fileDescriptor4, []int{1} }
 
 type isInterest_RegInfo interface {
 	isInterest_RegInfo()
@@ -96,8 +99,8 @@ func (m *Interest) GetChaincodeRegInfo() *ChaincodeReg {
 }
 
 // XXX_OneofFuncs is for the internal use of the proto package.
-func (*Interest) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), []interface{}) {
-	return _Interest_OneofMarshaler, _Interest_OneofUnmarshaler, []interface{}{
+func (*Interest) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
+	return _Interest_OneofMarshaler, _Interest_OneofUnmarshaler, _Interest_OneofSizer, []interface{}{
 		(*Interest_ChaincodeRegInfo)(nil),
 	}
 }
@@ -134,6 +137,22 @@ func _Interest_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffe
 	}
 }
 
+func _Interest_OneofSizer(msg proto.Message) (n int) {
+	m := msg.(*Interest)
+	// RegInfo
+	switch x := m.RegInfo.(type) {
+	case *Interest_ChaincodeRegInfo:
+		s := proto.Size(x.ChaincodeRegInfo)
+		n += proto.SizeVarint(2<<3 | proto.WireBytes)
+		n += proto.SizeVarint(uint64(s))
+		n += s
+	case nil:
+	default:
+		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
+	}
+	return n
+}
+
 // ---------- consumer events ---------
 // Register is sent by consumers for registering events
 // string type - "register"
@@ -141,9 +160,10 @@ type Register struct {
 	Events []*Interest `protobuf:"bytes,1,rep,name=events" json:"events,omitempty"`
 }
 
-func (m *Register) Reset()         { *m = Register{} }
-func (m *Register) String() string { return proto.CompactTextString(m) }
-func (*Register) ProtoMessage()    {}
+func (m *Register) Reset()                    { *m = Register{} }
+func (m *Register) String() string            { return proto.CompactTextString(m) }
+func (*Register) ProtoMessage()               {}
+func (*Register) Descriptor() ([]byte, []int) { return fileDescriptor4, []int{2} }
 
 func (m *Register) GetEvents() []*Interest {
 	if m != nil {
@@ -159,9 +179,10 @@ type Rejection struct {
 	ErrorMsg string       `protobuf:"bytes,2,opt,name=errorMsg" json:"errorMsg,omitempty"`
 }
 
-func (m *Rejection) Reset()         { *m = Rejection{} }
-func (m *Rejection) String() string { return proto.CompactTextString(m) }
-func (*Rejection) ProtoMessage()    {}
+func (m *Rejection) Reset()                    { *m = Rejection{} }
+func (m *Rejection) String() string            { return proto.CompactTextString(m) }
+func (*Rejection) ProtoMessage()               {}
+func (*Rejection) Descriptor() ([]byte, []int) { return fileDescriptor4, []int{3} }
 
 func (m *Rejection) GetTx() *Transaction {
 	if m != nil {
@@ -183,9 +204,10 @@ type Event struct {
 	Event isEvent_Event `protobuf_oneof:"Event"`
 }
 
-func (m *Event) Reset()         { *m = Event{} }
-func (m *Event) String() string { return proto.CompactTextString(m) }
-func (*Event) ProtoMessage()    {}
+func (m *Event) Reset()                    { *m = Event{} }
+func (m *Event) String() string            { return proto.CompactTextString(m) }
+func (*Event) ProtoMessage()               {}
+func (*Event) Descriptor() ([]byte, []int) { return fileDescriptor4, []int{4} }
 
 type isEvent_Event interface {
 	isEvent_Event()
@@ -245,8 +267,8 @@ func (m *Event) GetRejection() *Rejection {
 }
 
 // XXX_OneofFuncs is for the internal use of the proto package.
-func (*Event) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), []interface{}) {
-	return _Event_OneofMarshaler, _Event_OneofUnmarshaler, []interface{}{
+func (*Event) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
+	return _Event_OneofMarshaler, _Event_OneofUnmarshaler, _Event_OneofSizer, []interface{}{
 		(*Event_Register)(nil),
 		(*Event_Block)(nil),
 		(*Event_ChaincodeEvent)(nil),
@@ -325,13 +347,53 @@ func _Event_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) 
 	}
 }
 
+func _Event_OneofSizer(msg proto.Message) (n int) {
+	m := msg.(*Event)
+	// Event
+	switch x := m.Event.(type) {
+	case *Event_Register:
+		s := proto.Size(x.Register)
+		n += proto.SizeVarint(1<<3 | proto.WireBytes)
+		n += proto.SizeVarint(uint64(s))
+		n += s
+	case *Event_Block:
+		s := proto.Size(x.Block)
+		n += proto.SizeVarint(2<<3 | proto.WireBytes)
+		n += proto.SizeVarint(uint64(s))
+		n += s
+	case *Event_ChaincodeEvent:
+		s := proto.Size(x.ChaincodeEvent)
+		n += proto.SizeVarint(3<<3 | proto.WireBytes)
+		n += proto.SizeVarint(uint64(s))
+		n += s
+	case *Event_Rejection:
+		s := proto.Size(x.Rejection)
+		n += proto.SizeVarint(4<<3 | proto.WireBytes)
+		n += proto.SizeVarint(uint64(s))
+		n += s
+	case nil:
+	default:
+		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
+	}
+	return n
+}
+
 func init() {
+	proto.RegisterType((*ChaincodeReg)(nil), "protos.ChaincodeReg")
+	proto.RegisterType((*Interest)(nil), "protos.Interest")
+	proto.RegisterType((*Register)(nil), "protos.Register")
+	proto.RegisterType((*Rejection)(nil), "protos.Rejection")
+	proto.RegisterType((*Event)(nil), "protos.Event")
 	proto.RegisterEnum("protos.EventType", EventType_name, EventType_value)
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
 var _ grpc.ClientConn
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion3
 
 // Client API for Events service
 
@@ -428,4 +490,36 @@ var _Events_serviceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 	},
+	Metadata: fileDescriptor4,
+}
+
+func init() { proto.RegisterFile("events.proto", fileDescriptor4) }
+
+var fileDescriptor4 = []byte{
+	// 388 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0x64, 0x52, 0xdb, 0x8e, 0x9a, 0x40,
+	0x18, 0x06, 0x8f, 0xcc, 0x2f, 0x1a, 0x1c, 0x4d, 0x43, 0xbc, 0x68, 0x0d, 0x69, 0x1a, 0x63, 0x1a,
+	0x63, 0x68, 0xd3, 0xcb, 0x26, 0x05, 0x49, 0xa5, 0x07, 0x4d, 0x58, 0x5e, 0x00, 0xd9, 0xd1, 0x65,
+	0x77, 0x05, 0x33, 0x43, 0x36, 0xbb, 0x6f, 0xb5, 0x8f, 0xb8, 0xe3, 0x30, 0xe3, 0x21, 0x7b, 0x05,
+	0x33, 0xdf, 0xf7, 0x7f, 0x87, 0x1f, 0xc0, 0x24, 0x4f, 0x24, 0x2f, 0xd9, 0xec, 0x40, 0x8b, 0xb2,
+	0xc0, 0x2d, 0xf1, 0x60, 0xa3, 0x61, 0x7a, 0x97, 0x64, 0x79, 0x5a, 0xdc, 0x12, 0x01, 0x57, 0xe8,
+	0xc8, 0xdc, 0x26, 0x1b, 0x9a, 0xa5, 0xd5, 0xc9, 0xf9, 0x01, 0xa6, 0xaf, 0x58, 0x11, 0xd9, 0xe1,
+	0x01, 0x74, 0x4e, 0x53, 0xe1, 0xc2, 0xd6, 0xc7, 0xfa, 0x04, 0xe1, 0x3e, 0x20, 0xa1, 0xb0, 0x4a,
+	0xf6, 0xc4, 0xae, 0x1d, 0xaf, 0x9c, 0x3d, 0x18, 0x61, 0x5e, 0x12, 0x4a, 0x58, 0x89, 0x3f, 0x4b,
+	0x38, 0x7e, 0x39, 0x10, 0x31, 0xd1, 0x73, 0xfb, 0x95, 0x3c, 0x9b, 0x05, 0x0a, 0xc0, 0x73, 0xb0,
+	0xd2, 0x0b, 0xa7, 0x30, 0xdf, 0x16, 0x42, 0xab, 0xe3, 0x0e, 0x15, 0xf9, 0x32, 0xc9, 0x52, 0xf3,
+	0x10, 0xb4, 0x25, 0xd1, 0xf9, 0x0a, 0x06, 0x7f, 0xcd, 0x18, 0x77, 0xc4, 0x63, 0x68, 0x55, 0x75,
+	0xb9, 0x57, 0x9d, 0x8f, 0x5b, 0x6a, 0x5c, 0x05, 0x72, 0x7e, 0x02, 0x8a, 0xc8, 0x3d, 0x49, 0xcb,
+	0xac, 0xc8, 0xf1, 0x27, 0xa8, 0x95, 0xcf, 0x22, 0x56, 0xc7, 0x1d, 0x28, 0x6a, 0x4c, 0x93, 0x9c,
+	0x25, 0x15, 0xc1, 0x02, 0x83, 0x50, 0x5a, 0xd0, 0xff, 0x6c, 0x27, 0xcb, 0xbd, 0xea, 0xd0, 0x14,
+	0xc1, 0x79, 0x35, 0x83, 0x4a, 0x5f, 0x29, 0x71, 0x72, 0x53, 0x79, 0x96, 0x1a, 0xfe, 0x08, 0xcd,
+	0xcd, 0x63, 0x91, 0x3e, 0xc8, 0x3e, 0x5d, 0x45, 0xf1, 0x8e, 0x97, 0x1c, 0x9f, 0x43, 0xef, 0x54,
+	0x5d, 0xe8, 0xda, 0x75, 0x41, 0xfc, 0xf0, 0xae, 0xb8, 0x40, 0xf9, 0xc4, 0x17, 0x40, 0x54, 0x35,
+	0xb0, 0x1b, 0x82, 0xdc, 0x3f, 0x1b, 0x4b, 0x80, 0xaf, 0xa8, 0x2d, 0x83, 0x4e, 0x3d, 0x40, 0xe7,
+	0x55, 0x9b, 0x7c, 0x5b, 0xc1, 0xef, 0xf0, 0x26, 0x0e, 0x22, 0x4b, 0xc3, 0x08, 0x9a, 0xde, 0xbf,
+	0xb5, 0xff, 0xd7, 0xd2, 0x71, 0x17, 0x90, 0xbf, 0xfc, 0x15, 0xae, 0xfc, 0xf5, 0x22, 0xb0, 0x6a,
+	0xc7, 0x63, 0x14, 0xfc, 0x09, 0xfc, 0x38, 0x5c, 0xaf, 0xac, 0xba, 0xfb, 0x1d, 0x5a, 0x42, 0x83,
+	0xe1, 0x29, 0x34, 0x78, 0xa4, 0x12, 0x77, 0xaf, 0x3e, 0xe3, 0xe8, 0xfa, 0xe8, 0x68, 0x13, 0x7d,
+	0xae, 0x6f, 0xaa, 0xbf, 0xed, 0xdb, 0x5b, 0x00, 0x00, 0x00, 0xff, 0xff, 0x7c, 0x98, 0x88, 0x20,
+	0x84, 0x02, 0x00, 0x00,
 }
