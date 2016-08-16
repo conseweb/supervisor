@@ -17,9 +17,8 @@ package account
 
 import (
 	"fmt"
-	"testing"
-
 	"gopkg.in/check.v1"
+	"testing"
 )
 
 func Test(t *testing.T) {
