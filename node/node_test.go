@@ -81,6 +81,10 @@ func (this *NodeTest) TestFarmerPing(c *check.C) {
 
 	rspPing, err := this.client.FarmerPing(context.Background(), &pb.FarmerPingReq{
 		FarmerID: farmerId,
+		BlocksRange: &pb.BlocksRange{
+			HighBlockNumber: 100,
+			LowBlockNumber:  10,
+		},
 	})
 	c.Check(err, check.IsNil)
 	c.Check(rspPing.GetError().OK(), check.Equals, false)

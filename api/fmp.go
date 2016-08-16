@@ -60,24 +60,22 @@ func (this *FarmerPublic) FarmerPing(ctx context.Context, req *pb.FarmerPingReq)
 	}
 	handler := account.NewFarmerHandler(req.FarmerID)
 
-	if err := handler.Ping(); err != nil {
+	if need, brange, hashAlgo, err := handler.Ping(req.BlocksRange.HighBlockNumber, req.BlocksRange.LowBlockNumber); err != nil {
 		rsp.Error = pb.NewError(pb.ErrorType_FARMER_ONLINE, err.Error())
 		return rsp, nil
-	}
-
-	// need challenge
-	need, brange := handler.NeedChallengeBlocks(req.BlocksRange.HighBlockNumber, req.BlocksRange.LowBlockNumber)
-	rsp.NeedChallenge = need
-	rsp.BlocksRange = brange
-	rsp.Account = handler.Account()
-	rsp.NextPing = handler.NextPingTime()
-	if need {
-		hashAlgo := handler.ChallengeHashAlgo()
+	} else {
+		rsp.NeedChallenge = need
+		rsp.BlocksRange = brange
 		rsp.HashAlgo = hashAlgo
 
-		// sv cache challenge req
-		challenge.GetFarmerChallengeReqCache().SetFarmerChallengeReq(req.FarmerID, brange.HighBlockNumber, brange.LowBlockNumber, hashAlgo)
+		// need challenge
+		if need {
+			// sv cache challenge req
+			challenge.GetFarmerChallengeReqCache().SetFarmerChallengeReq(req.FarmerID, brange.HighBlockNumber, brange.LowBlockNumber, hashAlgo)
+		}
 	}
+	rsp.Account = handler.Account()
+	rsp.NextPing = handler.NextPingTime()
 
 	return rsp, nil
 }

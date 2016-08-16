@@ -34,7 +34,7 @@ type FarmerAccountHandler struct {
 }
 
 // whether or not need challenge blocks hash
-func (this *FarmerAccountHandler) NeedChallengeBlocks(highBlockNumber, lowBlockBumber uint64) (need bool, brange *pb.BlocksRange) {
+func (this *FarmerAccountHandler) needChallengeBlocks(highBlockNumber, lowBlockBumber uint64) (need bool, brange *pb.BlocksRange) {
 	brange = &pb.BlocksRange{}
 
 	need = (rand.Int() % 2) == 0
@@ -51,7 +51,7 @@ func (this *FarmerAccountHandler) NeedChallengeBlocks(highBlockNumber, lowBlockB
 }
 
 // choose challenge hash type from viper
-func (this *FarmerAccountHandler) ChallengeHashAlgo() pb.HashAlgo {
+func (this *FarmerAccountHandler) challengeHashAlgo() pb.HashAlgo {
 	hashAlgo := viper.GetString("farmer.challenge.hashalgo")
 	if hashAlgo == "" {
 		hashAlgo = pb.HashAlgo_SHA256.String()
@@ -107,21 +107,30 @@ func (this *FarmerAccountHandler) OnLine() error {
 	return nil
 }
 
-func (this *FarmerAccountHandler) Ping() error {
+func (this *FarmerAccountHandler) Ping(highBlockNumber, lowBlockNumber uint64) (need bool, brange *pb.BlocksRange, hashAlgo pb.HashAlgo, err error) {
 	if this.fsm.Current() == pb.FarmerState_OFFLINE.String() {
-		return errors.New("farmer is offline")
+		err = errors.New("farmer is offline")
+		return
+	}
+
+	need, brange = this.needChallengeBlocks(highBlockNumber, lowBlockNumber)
+	if need {
+		hashAlgo = this.challengeHashAlgo()
+	} else {
+		// if no need to challenge, just add balance this time
+		this.calcBalance()
 	}
 
 	this.lostCount = 0
 	this.afterEvent()
 
-	return nil
+	return
 }
 
 func (this *FarmerAccountHandler) ConquerChallenge(highBlockNumber, lowBlockNumber uint64, hashAlgo pb.HashAlgo, blocksHash string) error {
 	if challenge.ConquerChallenge(this.account.FarmerID, highBlockNumber, lowBlockNumber, hashAlgo, blocksHash) {
 		// TODO calc farmer balance
-		this.account.Balance += 100
+		this.calcBalance()
 	} else {
 		this.account.Balance = 0
 		return errors.New("farmer conquer challenge fail")
@@ -134,8 +143,8 @@ func (this *FarmerAccountHandler) ConquerChallenge(highBlockNumber, lowBlockNumb
 	return nil
 }
 
-func (this *FarmerAccountHandler) balance() {
-
+func (this *FarmerAccountHandler) calcBalance() {
+	this.account.Balance += 100
 }
 
 func (this *FarmerAccountHandler) Lost() error {
