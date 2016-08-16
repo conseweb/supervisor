@@ -17,13 +17,13 @@ package account
 
 import (
 	"github.com/conseweb/supervisor/account/store"
-	"github.com/conseweb/supervisor/account/tree"
 	pb "github.com/conseweb/supervisor/protos"
 	"github.com/looplab/fsm"
 	"github.com/op/go-logging"
 	"github.com/spf13/viper"
 	"sync"
 	"time"
+	"errors"
 )
 
 const (
@@ -67,8 +67,7 @@ func getBackendStorage() (storage store.Storage) {
 
 type FarmerAccountController struct {
 	accountStorage store.Storage
-	accountTree    tree.Tree
-	farmerFSMs     map[string]*fsm.FSM
+	accountTree    *AccountTree
 	l              *sync.RWMutex
 }
 
@@ -80,8 +79,7 @@ func getController() *FarmerAccountController {
 
 		controller = &FarmerAccountController{
 			accountStorage: getBackendStorage(),
-			accountTree:    tree.NewTree(),
-			farmerFSMs:     make(map[string]*fsm.FSM),
+			accountTree:    NewAccountTree(),
 			l:              &sync.RWMutex{},
 		}
 	})
@@ -91,35 +89,24 @@ func getController() *FarmerAccountController {
 
 // NewFarmer doesn't mean the farmer is already online
 // just stands for there is a farmer want to connect 2 supervisor
-func NewFarmerHandler(farmerId string) (handler *FarmerAccountHandler) {
+func NewFarmerHandler(farmerId string) (*FarmerAccountHandler, error) {
 	return getController().NewFarmerHandler(farmerId)
 }
-func (this *FarmerAccountController) NewFarmerHandler(farmerId string) (handler *FarmerAccountHandler) {
-	defer func() {
-		logger.Debugf("farmer: %+v", handler.Account())
-	}()
+func (this *FarmerAccountController) NewFarmerHandler(farmerId string) (handler *FarmerAccountHandler, err error) {
+	if farmerId == "" {
+		err = errors.New("farmerId is empty")
+		return
+	}
 
 	key := farmerId2Key(farmerId)
-	handler = &FarmerAccountHandler{}
-
 	// 1. looking farmer from account tree
 	{
+		handler = &FarmerAccountHandler{}
 		this.l.RLock()
-		farmerBytes, err := this.accountTree.Get(key)
+		handler, err = this.accountTree.Get(key)
 		this.l.RUnlock()
 		if err == nil {
-			// means farmer already in memory(tree), setup a farmer account handler
-			this.l.RLock()
-			existFsm, ok := this.farmerFSMs[key]
-			this.l.RUnlock()
-
-			if ok {
-				if handler.unmarshal(farmerBytes) == nil {
-					handler.fsm = existFsm
-					handler.account.State = pb.FarmerState(pb.FarmerState_value[handler.fsm.Current()])
-					return
-				}
-			}
+			return
 		}
 	}
 
@@ -135,48 +122,42 @@ func (this *FarmerAccountController) NewFarmerHandler(farmerId string) (handler 
 
 	// 2. looking farmer from storage, if found, put into account tree, and create fsm
 	{
+		handler = &FarmerAccountHandler{}
+		var farmerBytes []byte
 		this.l.RLock()
-		farmerBytes, err := this.accountStorage.Get([]byte(key))
+		farmerBytes, err = this.accountStorage.Get([]byte(key))
 		this.l.RUnlock()
 		if err == nil {
-			if handler.unmarshal(farmerBytes) == nil {
+			handler.account, err = bytes2FarmerAccount(farmerBytes)
+			if err == nil {
 				handler.fsm = tmpFsm
 				handler.account.State = pb.FarmerState(pb.FarmerState_value[handler.fsm.Current()])
 
-				if newFarmerBytes, err := handler.marshal(); err == nil {
-					this.l.Lock()
-					// put into account tree
-					this.accountTree.Put(key, newFarmerBytes)
+				this.l.Lock()
+				// put into account tree
+				this.accountTree.Put(key, handler)
+				this.l.Unlock()
 
-					// put handler'fsm into fsm's map
-					this.farmerFSMs[key] = handler.fsm
-					this.l.Unlock()
-
-					return
-				}
+				return
 			}
 		}
 	}
 
 	// 3 if can not load farmer account info from tree & storage, new a farmer account info
 	{
+		handler = &FarmerAccountHandler{}
 		this.l.Lock()
-		farmerAccount := &pb.FarmerAccount{
+		handler.account = &pb.FarmerAccount{
 			FarmerID:         farmerId,
 			Balance:          0,
 			State:            pb.FarmerState_OFFLINE,
 			LastModifiedTime: time.Now().UnixNano(),
 		}
-
-		handler.account = farmerAccount
 		handler.fsm = tmpFsm
-		if farmerBytes, err := handler.marshal(); err == nil {
-			// put into account tree
-			this.accountTree.Put(key, farmerBytes)
+		// put into account tree
+		this.accountTree.Put(key, handler)
+		if farmerBytes, err := farmerAccount2Bytes(handler.account); err == nil {
 			this.asyncPersistFarmerBytes([]byte(key), farmerBytes)
-
-			// put handler'fsm into fsm's map
-			this.farmerFSMs[key] = handler.fsm
 		}
 		this.l.Unlock()
 
@@ -192,10 +173,10 @@ func (this *FarmerAccountController) UpdateFarmerHandler(handler *FarmerAccountH
 	key := farmerId2Key(handler.account.FarmerID)
 
 	this.l.Lock()
-	if farmerBytes, err := handler.marshal(); err == nil {
+	if farmerBytes, err := farmerAccount2Bytes(handler.account); err == nil {
 		// save back 2 memory
 		if handler.account.State != pb.FarmerState_OFFLINE {
-			this.accountTree.Put(key, farmerBytes)
+			this.accountTree.Put(key, handler)
 		} else {
 			this.accountTree.Delete(key)
 		}
@@ -210,7 +191,6 @@ func Close() error {
 	return getController().Close()
 }
 func (this *FarmerAccountController) Close() error {
-	this.farmerFSMs = nil
 	this.accountTree = nil
 	return this.accountStorage.Close()
 }

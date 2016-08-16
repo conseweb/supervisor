@@ -13,39 +13,38 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package tree
+package account
 
 import (
 	"fmt"
-	"testing"
-
 	"gopkg.in/check.v1"
+	"testing"
 )
 
 func Test(t *testing.T) {
 	check.TestingT(t)
 }
 
-type TestTrie struct{}
+type TestAccountTree struct{}
 
-var _ = check.Suite(&TestTrie{})
+var _ = check.Suite(&TestAccountTree{})
 
-func (s *TestTrie) TestTrieTree_Put(c *check.C) {
-	trie := NewTrie()
+func (s *TestAccountTree) TestTrieTree_Put(c *check.C) {
+	trie := NewAccountTree()
 	c.Check(trie.Put("abc", nil), check.IsNil)
 }
 
-func (s *TestTrie) TestTrieTree_Get(c *check.C) {
-	trie := NewTrie()
+func (s *TestAccountTree) TestTrieTree_Get(c *check.C) {
+	trie := NewAccountTree()
 
-	c.Check(trie.Put("abc", []byte("abc")), check.IsNil)
+	c.Check(trie.Put("abc", &FarmerAccountHandler{}), check.IsNil)
 	vget, err := trie.Get("abc")
 	c.Check(err, check.IsNil)
-	c.Assert(string(vget), check.Equals, "abc")
+	c.Assert(vget, check.NotNil)
 }
 
-func (s *TestTrie) TestTrieTree_Delete(c *check.C) {
-	trie := NewTrie()
+func (s *TestAccountTree) TestTrieTree_Delete(c *check.C) {
+	trie := NewAccountTree()
 	initial := []string{"football", "foostar", "foosball"}
 
 	for _, key := range initial {
@@ -57,8 +56,8 @@ func (s *TestTrie) TestTrieTree_Delete(c *check.C) {
 	c.Assert(len(keys), check.Equals, 2)
 }
 
-func (s *TestTrie) TestTrieTree_HasKeysWithPrefix(c *check.C) {
-	trie := NewTrie()
+func (s *TestAccountTree) TestTrieTree_HasKeysWithPrefix(c *check.C) {
+	trie := NewAccountTree()
 
 	c.Check(trie.Put("abc", nil), check.IsNil)
 	c.Check(trie.Put("acb", nil), check.IsNil)
@@ -67,8 +66,8 @@ func (s *TestTrie) TestTrieTree_HasKeysWithPrefix(c *check.C) {
 	c.Check(trie.HasKeysWithPrefix("bc"), check.Equals, false)
 }
 
-func (s *TestTrie) TestTrieTree_PrefixSearch(c *check.C) {
-	trie := NewTrie()
+func (s *TestAccountTree) TestTrieTree_PrefixSearch(c *check.C) {
+	trie := NewAccountTree()
 
 	c.Check(trie.Put("abc", nil), check.IsNil)
 	c.Check(trie.Put("acb", nil), check.IsNil)
@@ -76,48 +75,47 @@ func (s *TestTrie) TestTrieTree_PrefixSearch(c *check.C) {
 	c.Check(2, check.Not(check.Equals), len(trie.PrefixSearch("b")))
 }
 
-func (s *TestTrie) TestTrieTree_Update(c *check.C) {
-	trie := NewTrie()
+func (s *TestAccountTree) TestTrieTree_Update(c *check.C) {
+	trie := NewAccountTree()
 
-	c.Check(trie.Put("abc", []byte("abc")), check.IsNil)
+	c.Check(trie.Put("abc", nil), check.IsNil)
 	get1, err1 := trie.Get("abc")
 	c.Check(err1, check.IsNil)
-	c.Check(string(get1), check.Equals, "abc")
+	c.Check(get1, check.IsNil)
 
-	c.Check(trie.Put("abc", []byte("acb")), check.IsNil)
+	c.Check(trie.Put("abc", &FarmerAccountHandler{}), check.IsNil)
 	get2, err2 := trie.Get("abc")
 	c.Check(err2, check.IsNil)
-	c.Check(string(get2), check.Equals, "acb")
-	c.Check(string(get2), check.Not(check.Equals), "abc")
+	c.Check(get2, check.NotNil)
 }
 
-func (s *TestTrie) TestTrieTree_Len(c *check.C) {
-	trie := NewTrie()
+func (s *TestAccountTree) TestTrieTree_Len(c *check.C) {
+	trie := NewAccountTree()
 
-	c.Check(trie.Put("abc", []byte("abc")), check.IsNil)
-	c.Check(trie.Put("abc", []byte("abc")), check.IsNil)
-	c.Check(trie.Put("abd", []byte("abc")), check.IsNil)
+	c.Check(trie.Put("abc", nil), check.IsNil)
+	c.Check(trie.Put("abc", nil), check.IsNil)
+	c.Check(trie.Put("abd", nil), check.IsNil)
 
 	c.Assert(trie.Len(), check.Equals, 2)
 }
 
-func (s *TestTrie) BenchmarkTrieTree_Put(c *check.C) {
-	trie := NewTrie()
+func (s *TestAccountTree) BenchmarkTrieTree_Put(c *check.C) {
+	trie := NewAccountTree()
 	for i := 0; i < c.N; i++ {
-		trie.Put(fmt.Sprintf("abcdefghijklmnopqrstuvwxyz%v", i), []byte("abc"))
+		trie.Put(fmt.Sprintf("abc%v", i), nil)
 	}
 }
 
-func (s *TestTrie) BenchmarkTrieTree_Get(c *check.C) {
-	trie := NewTrie()
-	trie.Put("abcdefg", nil)
+func (s *TestAccountTree) BenchmarkTrieTree_Get(c *check.C) {
+	trie := NewAccountTree()
+	trie.Put("abc", nil)
 	for i := 0; i < c.N; i++ {
-		trie.Get("abcdefg")
+		trie.Get("abc")
 	}
 }
 
-func (s *TestTrie) BenchmarkTrieTree_Delete(c *check.C) {
-	trie := NewTrie()
+func (s *TestAccountTree) BenchmarkTrieTree_Delete(c *check.C) {
+	trie := NewAccountTree()
 	for i := 0; i < c.N; i++ {
 		trie.Put("abcdefg", nil)
 		trie.Delete("abcdefg")

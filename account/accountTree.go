@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package tree
+package account
 
 import (
 	"errors"
@@ -24,53 +24,52 @@ var (
 )
 
 // key support ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789(62)
-type TrieTreeNode struct {
-	bkey     byte
-	value    []byte
-	parent   *TrieTreeNode
+type AccountTreeNode struct {
+	key      byte
+	value    *FarmerAccountHandler
+	parent   *AccountTreeNode
 	depth    int
-	children map[byte]*TrieTreeNode
+	children map[byte]*AccountTreeNode
 	term     bool
 }
 
-func (n *TrieTreeNode) NewChild(bkey byte, value []byte, term bool) *TrieTreeNode {
-	node := &TrieTreeNode{
-		bkey:     bkey,
-		value:    value,
-		parent:   n,
-		depth:    n.depth + 1,
-		children: make(map[byte]*TrieTreeNode),
+func (this *AccountTreeNode) NewChild(key byte, handler *FarmerAccountHandler, term bool) *AccountTreeNode {
+	node := &AccountTreeNode{
+		key:      key,
+		value:    handler,
+		parent:   this,
+		depth:    this.depth + 1,
+		children: make(map[byte]*AccountTreeNode),
 		term:     term,
 	}
 
-	n.children[bkey] = node
+	this.children[key] = node
 	return node
 }
 
-func (n *TrieTreeNode) DeleteChild(bkey byte) {
-	delete(n.children, bkey)
+func (this *AccountTreeNode) DeleteChild(key byte) {
+	delete(this.children, key)
 }
 
-type TrieTree struct {
-	root *TrieTreeNode
+type AccountTree struct {
+	root *AccountTreeNode
 	size int
 }
 
 const null = 0x0
 
 // create a new trie tree with an initialized root node
-// and must provide a marshalFunc to marshal value into node
-func NewTrie() *TrieTree {
-	return &TrieTree{
-		root: &TrieTreeNode{
-			children: make(map[byte]*TrieTreeNode),
+func NewAccountTree() *AccountTree {
+	return &AccountTree{
+		root: &AccountTreeNode{
+			children: make(map[byte]*AccountTreeNode),
 		},
 		size: 0,
 	}
 }
 
 // put the key to the trie tree with value
-func (t *TrieTree) Put(key string, value []byte) error {
+func (t *AccountTree) Put(key string, handler *FarmerAccountHandler) error {
 	if _, err := t.Get(key); err == errKeyNotFound {
 		t.size++
 	}
@@ -81,15 +80,15 @@ func (t *TrieTree) Put(key string, value []byte) error {
 		if n, ok := node.children[bkey]; ok {
 			node = n
 		} else {
-			node = node.NewChild(bkey, value, false)
+			node = node.NewChild(bkey, handler, false)
 		}
 	}
 
-	node = node.NewChild(null, value, true)
+	node = node.NewChild(null, handler, true)
 	return nil
 }
 
-func (t *TrieTree) Get(key string) ([]byte, error) {
+func (t *AccountTree) Get(key string) (*FarmerAccountHandler, error) {
 	node, geted := getNode(t.root, []byte(key))
 	if !geted {
 		return nil, errKeyNotFound
@@ -103,7 +102,7 @@ func (t *TrieTree) Get(key string) ([]byte, error) {
 	return node.value, nil
 }
 
-func (t *TrieTree) Delete(key string) {
+func (t *AccountTree) Delete(key string) {
 	i := int(0)
 	bkeys := []byte(key)
 	node, exist := getNode(t.root, bkeys)
@@ -121,12 +120,12 @@ func (t *TrieTree) Delete(key string) {
 	}
 }
 
-func (t *TrieTree) HasKeysWithPrefix(key string) bool {
+func (t *AccountTree) HasKeysWithPrefix(key string) bool {
 	_, exist := getNode(t.root, []byte(key))
 	return exist
 }
 
-func (t *TrieTree) PrefixSearch(pre string) []string {
+func (t *AccountTree) PrefixSearch(pre string) []string {
 	node, exist := getNode(t.root, []byte(pre))
 	if !exist {
 		return nil
@@ -135,15 +134,15 @@ func (t *TrieTree) PrefixSearch(pre string) []string {
 	return collect(node)
 }
 
-func (t *TrieTree) Keys() []string {
+func (t *AccountTree) Keys() []string {
 	return t.PrefixSearch("")
 }
 
-func (t *TrieTree) Len() int {
+func (t *AccountTree) Len() int {
 	return t.size
 }
 
-func getNode(node *TrieTreeNode, bkeys []byte) (*TrieTreeNode, bool) {
+func getNode(node *AccountTreeNode, bkeys []byte) (*AccountTreeNode, bool) {
 	if node == nil {
 		return nil, false
 	}
@@ -167,11 +166,11 @@ func getNode(node *TrieTreeNode, bkeys []byte) (*TrieTreeNode, bool) {
 	return getNode(n, nbkeys)
 }
 
-func collect(node *TrieTreeNode) []string {
+func collect(node *AccountTreeNode) []string {
 	keys := []string{}
 	i := int(0)
 
-	nodes := []*TrieTreeNode{node}
+	nodes := []*AccountTreeNode{node}
 	for l := len(nodes); l != 0; l = len(nodes) {
 		i = l - 1
 		n := nodes[i]
@@ -183,7 +182,7 @@ func collect(node *TrieTreeNode) []string {
 		if n.term {
 			word := ""
 			for p := n.parent; p.depth != 0; p = p.parent {
-				word = string(p.bkey) + word
+				word = string(p.key) + word
 			}
 
 			keys = append(keys, word)
@@ -192,4 +191,3 @@ func collect(node *TrieTreeNode) []string {
 
 	return keys
 }
-
