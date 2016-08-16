@@ -17,8 +17,9 @@ package challenge
 
 import (
 	"fmt"
-	pb "github.com/conseweb/supervisor/protos"
 	"sync"
+
+	pb "github.com/conseweb/supervisor/protos"
 )
 
 // once a farmer required to challenge the blocks hash,
@@ -41,16 +42,16 @@ type FarmerChallengeReq struct {
 	hashAlgo    pb.HashAlgo
 }
 
-func (this *defaultFarmerChallengeReqCache) cachekey(farmerId string, highBlockNumber, lowBlockNumber uint64, hashAlgo pb.HashAlgo) string {
+func (c *defaultFarmerChallengeReqCache) cachekey(farmerId string, highBlockNumber, lowBlockNumber uint64, hashAlgo pb.HashAlgo) string {
 	return HASH(pb.HashAlgo_SHA256, []byte(fmt.Sprintf("%s/%v/%v/%s", farmerId, highBlockNumber, lowBlockNumber, hashAlgo.String())))
 }
 
-func (this *defaultFarmerChallengeReqCache) SetFarmerChallengeReq(farmerId string, highBlockNumber, lowBlockNumber uint64, hashAlgo pb.HashAlgo) bool {
-	key := this.cachekey(farmerId, highBlockNumber, lowBlockNumber, hashAlgo)
+func (c *defaultFarmerChallengeReqCache) SetFarmerChallengeReq(farmerId string, highBlockNumber, lowBlockNumber uint64, hashAlgo pb.HashAlgo) bool {
+	key := c.cachekey(farmerId, highBlockNumber, lowBlockNumber, hashAlgo)
 
-	if _, ok := this.caches[key]; !ok {
+	if _, ok := c.caches[key]; !ok {
 		logger.Debugf("challengeReq(%s) set to the cache", key)
-		this.caches[key] = &FarmerChallengeReq{
+		c.caches[key] = &FarmerChallengeReq{
 			farmerId: farmerId,
 			blocksRange: &pb.BlocksRange{
 				HighBlockNumber: highBlockNumber,
@@ -65,10 +66,10 @@ func (this *defaultFarmerChallengeReqCache) SetFarmerChallengeReq(farmerId strin
 	return false
 }
 
-func (this *defaultFarmerChallengeReqCache) GetFarmerChallengeReq(farmerId string, highBlockNumber, lowBlockNumber uint64, hashAlgo pb.HashAlgo) (*FarmerChallengeReq, bool) {
-	key := this.cachekey(farmerId, highBlockNumber, lowBlockNumber, hashAlgo)
+func (c *defaultFarmerChallengeReqCache) GetFarmerChallengeReq(farmerId string, highBlockNumber, lowBlockNumber uint64, hashAlgo pb.HashAlgo) (*FarmerChallengeReq, bool) {
+	key := c.cachekey(farmerId, highBlockNumber, lowBlockNumber, hashAlgo)
 
-	cache, ok := this.caches[key]
+	cache, ok := c.caches[key]
 	if !ok {
 		logger.Debugf("challengeReq(%s) didn't hit the cache", key)
 		return nil, false
@@ -78,14 +79,14 @@ func (this *defaultFarmerChallengeReqCache) GetFarmerChallengeReq(farmerId strin
 	return cache, true
 }
 
-func (this *defaultFarmerChallengeReqCache) DelFarmerChallengeReq(farmerId string, highBlockNumber, lowBlockNumber uint64, hashAlgo pb.HashAlgo) {
-	key := this.cachekey(farmerId, highBlockNumber, lowBlockNumber, hashAlgo)
+func (c *defaultFarmerChallengeReqCache) DelFarmerChallengeReq(farmerId string, highBlockNumber, lowBlockNumber uint64, hashAlgo pb.HashAlgo) {
+	key := c.cachekey(farmerId, highBlockNumber, lowBlockNumber, hashAlgo)
 
-	delete(this.caches, key)
+	delete(c.caches, key)
 }
 
-func (this *defaultFarmerChallengeReqCache) Close() error {
-	this.caches = nil
+func (c *defaultFarmerChallengeReqCache) Close() error {
+	c.caches = nil
 	return nil
 }
 

@@ -21,10 +21,11 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/hex"
-	pb "github.com/conseweb/supervisor/protos"
-	"golang.org/x/crypto/sha3"
 	"hash"
 	"strings"
+
+	pb "github.com/conseweb/supervisor/protos"
+	"golang.org/x/crypto/sha3"
 )
 
 func HASH(hashAlgo pb.HashAlgo, p []byte) string {

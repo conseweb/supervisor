@@ -69,11 +69,11 @@ func NewRocksdbStorage(dbpath string) (*RocksdbStorage, error) {
 	}, nil
 }
 
-func (this *RocksdbStorage) Get(key []byte) ([]byte, error) {
+func (rdb *RocksdbStorage) Get(key []byte) ([]byte, error) {
 	opt := gorocksdb.NewDefaultReadOptions()
 	defer opt.Destroy()
 
-	slice, err := this.db.GetCF(opt, this.defaultCFH, key)
+	slice, err := rdb.db.GetCF(opt, rdb.defaultCFH, key)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +85,7 @@ func (this *RocksdbStorage) Get(key []byte) ([]byte, error) {
 
 	data := makeCopy(slice.Data())
 
-	//data, err := this.db.GetBytes(opt, key)
+	//data, err := rdb.db.GetBytes(opt, key)
 	//if err != nil {
 	//	return nil, err
 	//}
@@ -96,25 +96,25 @@ func (this *RocksdbStorage) Get(key []byte) ([]byte, error) {
 	return data, nil
 }
 
-func (this *RocksdbStorage) Set(key []byte, value []byte) error {
+func (rdb *RocksdbStorage) Set(key []byte, value []byte) error {
 	opt := gorocksdb.NewDefaultWriteOptions()
 	defer opt.Destroy()
 
-	return this.db.PutCF(opt, this.defaultCFH, key, value)
-	//return this.db.Put(opt, key, value)
+	return rdb.db.PutCF(opt, rdb.defaultCFH, key, value)
+	//return rdb.db.Put(opt, key, value)
 }
 
-func (this *RocksdbStorage) Del(key []byte) error {
+func (rdb *RocksdbStorage) Del(key []byte) error {
 	opt := gorocksdb.NewDefaultWriteOptions()
 	defer opt.Destroy()
 
-	return this.db.DeleteCF(opt, this.defaultCFH, key)
-	//return this.db.Delete(opt, key)
+	return rdb.db.DeleteCF(opt, rdb.defaultCFH, key)
+	//return rdb.db.Delete(opt, key)
 }
 
-func (this *RocksdbStorage) Close() error {
-	this.defaultCFH.Destroy()
-	this.db.Close()
+func (rdb *RocksdbStorage) Close() error {
+	rdb.defaultCFH.Destroy()
+	rdb.db.Close()
 
 	return nil
 }

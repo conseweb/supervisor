@@ -20,13 +20,13 @@ import (
 	"gopkg.in/check.v1"
 )
 
-func (this *TestFarmerAccount) TestOnLine(c *check.C) {
+func (t *TestFarmerAccount) TestOnLine(c *check.C) {
 	handler, _ := NewFarmerHandler("TestOnLine")
 	c.Check(handler.OnLine(), check.IsNil)
 	c.Assert(handler.Account().State, check.Equals, pb.FarmerState_ONLINE)
 }
 
-func (this *TestFarmerAccount) TestLost(c *check.C) {
+func (t *TestFarmerAccount) TestLost(c *check.C) {
 	handler, _ := NewFarmerHandler("TestLost")
 	c.Check(handler.OnLine(), check.IsNil)
 	c.Assert(handler.Account().State, check.Equals, pb.FarmerState_ONLINE)
@@ -36,7 +36,7 @@ func (this *TestFarmerAccount) TestLost(c *check.C) {
 	c.Assert(handler.Account().State, check.Equals, pb.FarmerState_LOST)
 }
 
-func (this *TestFarmerAccount) TestOffLine(c *check.C) {
+func (t *TestFarmerAccount) TestOffLine(c *check.C) {
 	handler, _ := NewFarmerHandler("TestOffLine")
 	c.Check(handler.OnLine(), check.IsNil)
 	c.Assert(handler.Account().State, check.Equals, pb.FarmerState_ONLINE)

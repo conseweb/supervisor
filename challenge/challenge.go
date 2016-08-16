@@ -19,10 +19,11 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"strings"
+
 	pb "github.com/conseweb/supervisor/protos"
 	"github.com/hyperledger/fabric/core/ledger"
 	"github.com/op/go-logging"
-	"strings"
 )
 
 var (
@@ -57,7 +58,7 @@ func ConquerChallenge(farmerId string, highBlockNumber, lowBlockNumber uint64, h
 	// compare farmer result & sv result
 	serverHash := FarmerBindConquerHash(farmerId, hashAlgo, originalHash)
 	if strings.Compare(blocksHash, serverHash) != 0 {
-		logger.Warningf("farmer[%s] conquer challenge fail, farmer hash: %s, server hash: %s",farmerId, blocksHash, serverHash)
+		logger.Warningf("farmer[%s] conquer challenge fail, farmer hash: %s, server hash: %s", farmerId, blocksHash, serverHash)
 		return false
 	}
 	logger.Debugf("farmer[%s] conquer challenge success.", farmerId)

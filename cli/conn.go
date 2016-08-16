@@ -16,11 +16,12 @@ limitations under the License.
 package cli
 
 import (
+	"time"
+
 	"github.com/op/go-logging"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"time"
 )
 
 const defaultTimeout = time.Second * 3

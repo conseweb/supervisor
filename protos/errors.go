@@ -17,12 +17,12 @@ package protos
 
 import "fmt"
 
-func (this *Error) Error() string {
-	return fmt.Sprintf("Error[%v]: %s", this.ErrorType, this.Message)
+func (e *Error) Error() string {
+	return fmt.Sprintf("Error[%v]: %s", e.ErrorType, e.Message)
 }
 
-func (this *Error) OK() bool {
-	return this.ErrorType == ErrorType_NONE_ERROR
+func (e *Error) OK() bool {
+	return e.ErrorType == ErrorType_NONE_ERROR
 }
 
 func ResponseOK() *Error {

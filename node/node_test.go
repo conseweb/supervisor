@@ -16,6 +16,12 @@ limitations under the License.
 package node
 
 import (
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+	"time"
+
 	"github.com/conseweb/supervisor/challenge"
 	"github.com/conseweb/supervisor/cli"
 	pb "github.com/conseweb/supervisor/protos"
@@ -23,11 +29,6 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"gopkg.in/check.v1"
-	"os"
-	"path/filepath"
-	"strings"
-	"testing"
-	"time"
 )
 
 func Test(t *testing.T) {
@@ -41,34 +42,34 @@ type NodeTest struct {
 
 var _ = check.Suite(&NodeTest{})
 
-func (this *NodeTest) SetUpSuite(c *check.C) {
+func (t *NodeTest) SetUpSuite(c *check.C) {
 	loadConfigure()
 
 	go StartNode()
 	time.Sleep(time.Second)
 }
 
-func (this *NodeTest) SetUpTest(c *check.C) {
+func (t *NodeTest) SetUpTest(c *check.C) {
 	conn, err := cli.NewClientConnectionWithAddress(viper.GetString("node.address"), true, false, nil)
 	c.Check(err, check.IsNil)
 
-	this.conn = conn
-	this.client = pb.NewFarmerPublicClient(this.conn)
+	t.conn = conn
+	t.client = pb.NewFarmerPublicClient(t.conn)
 }
 
-func (this *NodeTest) TearDownTest(c *check.C) {
-	this.conn.Close()
-	this.client = nil
+func (t *NodeTest) TearDownTest(c *check.C) {
+	t.conn.Close()
+	t.client = nil
 }
 
-func (this *NodeTest) TearDownSuite(c *check.C) {
+func (t *NodeTest) TearDownSuite(c *check.C) {
 	StopNode()
 }
 
-func (this *NodeTest) TestFarmerOnLine(c *check.C) {
+func (t *NodeTest) TestFarmerOnLine(c *check.C) {
 	farmerId := "TestFarmerOnLine"
 
-	rsp, err := this.client.FarmerOnLine(context.Background(), &pb.FarmerOnLineReq{
+	rsp, err := t.client.FarmerOnLine(context.Background(), &pb.FarmerOnLineReq{
 		FarmerID: farmerId,
 	})
 	c.Check(err, check.IsNil)
@@ -76,10 +77,10 @@ func (this *NodeTest) TestFarmerOnLine(c *check.C) {
 	c.Check(rsp.GetError().OK(), check.Equals, true)
 }
 
-func (this *NodeTest) TestFarmerPing(c *check.C) {
+func (t *NodeTest) TestFarmerPing(c *check.C) {
 	farmerId := "TestFarmerPing"
 
-	rspPing, err := this.client.FarmerPing(context.Background(), &pb.FarmerPingReq{
+	rspPing, err := t.client.FarmerPing(context.Background(), &pb.FarmerPingReq{
 		FarmerID: farmerId,
 		BlocksRange: &pb.BlocksRange{
 			HighBlockNumber: 100,
@@ -89,7 +90,7 @@ func (this *NodeTest) TestFarmerPing(c *check.C) {
 	c.Check(err, check.IsNil)
 	c.Check(rspPing.GetError().OK(), check.Equals, false)
 
-	rspOnLine, err := this.client.FarmerOnLine(context.Background(), &pb.FarmerOnLineReq{
+	rspOnLine, err := t.client.FarmerOnLine(context.Background(), &pb.FarmerOnLineReq{
 		FarmerID: farmerId,
 	})
 	c.Check(err, check.IsNil)
@@ -98,7 +99,7 @@ func (this *NodeTest) TestFarmerPing(c *check.C) {
 
 	// ten times ping
 	for i := 0; i < 10; i++ {
-		rspPing, err := this.client.FarmerPing(context.Background(), &pb.FarmerPingReq{
+		rspPing, err := t.client.FarmerPing(context.Background(), &pb.FarmerPingReq{
 			FarmerID: farmerId,
 			BlocksRange: &pb.BlocksRange{
 				HighBlockNumber: 100,
@@ -110,10 +111,10 @@ func (this *NodeTest) TestFarmerPing(c *check.C) {
 	}
 }
 
-func (this *NodeTest) TestFarmerConquerChallenge(c *check.C) {
+func (t *NodeTest) TestFarmerConquerChallenge(c *check.C) {
 	farmerId := "TestFarmerConquerChallenge"
 
-	rspOnLine, err := this.client.FarmerOnLine(context.Background(), &pb.FarmerOnLineReq{
+	rspOnLine, err := t.client.FarmerOnLine(context.Background(), &pb.FarmerOnLineReq{
 		FarmerID: farmerId,
 	})
 	c.Check(err, check.IsNil)
@@ -122,7 +123,7 @@ func (this *NodeTest) TestFarmerConquerChallenge(c *check.C) {
 
 	// ten times ping
 	for i := 0; i < 10; i++ {
-		rspPing, err := this.client.FarmerPing(context.Background(), &pb.FarmerPingReq{
+		rspPing, err := t.client.FarmerPing(context.Background(), &pb.FarmerPingReq{
 			FarmerID: farmerId,
 			BlocksRange: &pb.BlocksRange{
 				HighBlockNumber: 100,
@@ -133,7 +134,7 @@ func (this *NodeTest) TestFarmerConquerChallenge(c *check.C) {
 		c.Check(rspPing.GetError().OK(), check.Equals, true)
 
 		if rspPing.NeedChallenge {
-			rspChallenge, err := this.client.FarmerConquerChallenge(context.Background(), &pb.FarmerConquerChallengeReq{
+			rspChallenge, err := t.client.FarmerConquerChallenge(context.Background(), &pb.FarmerConquerChallengeReq{
 				FarmerID:    farmerId,
 				BlocksHash:  challenge.FarmerBindConquerHash(farmerId, rspPing.HashAlgo, challenge.HASH(rspPing.HashAlgo, []byte(""))),
 				HashAlgo:    rspPing.HashAlgo,
@@ -146,17 +147,17 @@ func (this *NodeTest) TestFarmerConquerChallenge(c *check.C) {
 	}
 }
 
-func (this *NodeTest) TestFarmerOffLine(c *check.C) {
+func (t *NodeTest) TestFarmerOffLine(c *check.C) {
 	farmerId := "TestFarmerOffLine"
 
-	rspOnLine, err := this.client.FarmerOnLine(context.Background(), &pb.FarmerOnLineReq{
+	rspOnLine, err := t.client.FarmerOnLine(context.Background(), &pb.FarmerOnLineReq{
 		FarmerID: farmerId,
 	})
 	c.Check(err, check.IsNil)
 	c.Check(rspOnLine, check.NotNil)
 	c.Check(rspOnLine.GetError().OK(), check.Equals, true)
 
-	rspOffLine, err := this.client.FarmerOffLine(context.Background(), &pb.FarmerOffLineReq{
+	rspOffLine, err := t.client.FarmerOffLine(context.Background(), &pb.FarmerOffLineReq{
 		FarmerID: farmerId,
 	})
 

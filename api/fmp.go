@@ -32,7 +32,7 @@ var (
 type FarmerPublic struct {
 }
 
-func (this *FarmerPublic) FarmerOnLine(ctx context.Context, req *pb.FarmerOnLineReq) (*pb.FarmerOnLineRsp, error) {
+func (fmp *FarmerPublic) FarmerOnLine(ctx context.Context, req *pb.FarmerOnLineReq) (*pb.FarmerOnLineRsp, error) {
 	logger.Debugf("new connect for FarmerOnLine, req: %+v", req)
 
 	rsp := &pb.FarmerOnLineRsp{
@@ -59,7 +59,7 @@ RET:
 	return rsp, nil
 }
 
-func (this *FarmerPublic) FarmerPing(ctx context.Context, req *pb.FarmerPingReq) (*pb.FarmerPingRsp, error) {
+func (fmp *FarmerPublic) FarmerPing(ctx context.Context, req *pb.FarmerPingReq) (*pb.FarmerPingRsp, error) {
 	logger.Debugf("new connect for FarmerPing, req: %+v", req)
 
 	rsp := &pb.FarmerPingRsp{
@@ -100,7 +100,7 @@ RET:
 	return rsp, nil
 }
 
-func (this *FarmerPublic) FarmerConquerChallenge(ctx context.Context, req *pb.FarmerConquerChallengeReq) (*pb.FarmerConquerChallengeRsp, error) {
+func (fmp *FarmerPublic) FarmerConquerChallenge(ctx context.Context, req *pb.FarmerConquerChallengeReq) (*pb.FarmerConquerChallengeRsp, error) {
 	logger.Debugf("new connect for FarmerConquerChallenge, req: %+v", req)
 
 	rsp := &pb.FarmerConquerChallengeRsp{
@@ -133,7 +133,7 @@ RET:
 	return rsp, nil
 }
 
-func (this *FarmerPublic) FarmerOffLine(ctx context.Context, req *pb.FarmerOffLineReq) (*pb.FarmerOffLineRsp, error) {
+func (fmp *FarmerPublic) FarmerOffLine(ctx context.Context, req *pb.FarmerOffLineReq) (*pb.FarmerOffLineRsp, error) {
 	logger.Debugf("new connect for FarmerOffLine, req: %+v", req)
 
 	rsp := &pb.FarmerOffLineRsp{

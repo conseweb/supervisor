@@ -16,13 +16,14 @@ limitations under the License.
 package main
 
 import (
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/conseweb/supervisor/node"
 	"github.com/op/go-logging"
 	"github.com/spf13/viper"
 	"gopkg.in/alecthomas/kingpin.v2"
-	"os"
-	"path/filepath"
-	"strings"
 )
 
 const (
