@@ -19,6 +19,7 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
 	"github.com/spf13/viper"
 	"gopkg.in/check.v1"
 )
@@ -28,7 +29,7 @@ type TestFarmerAccount struct {
 
 var _ = check.Suite(&TestFarmerAccount{})
 
-func (this *TestFarmerAccount) SetUpSuite(c *check.C) {
+func (t *TestFarmerAccount) SetUpSuite(c *check.C) {
 	viper.Set("account.store.backend", "rocksdb")
 	viper.Set("account.store.rocksdb.dbpath", filepath.Join(os.TempDir(), "testAccount"))
 	viper.Set("farmer.ping.interval", 900)
@@ -38,7 +39,7 @@ func (this *TestFarmerAccount) SetUpSuite(c *check.C) {
 	viper.Set("farmer.challenge.hashalgo", "SHA256")
 }
 
-func (this *TestFarmerAccount) TearDownSuite(c *check.C) {
+func (t *TestFarmerAccount) TearDownSuite(c *check.C) {
 	time.Sleep(time.Second)
 	Close()
 	os.Remove(filepath.Join(os.TempDir(), "testAccount"))

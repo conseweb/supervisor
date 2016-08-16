@@ -17,8 +17,10 @@ package challenge
 
 import (
 	"fmt"
-	pb "github.com/conseweb/supervisor/protos"
 	"sync"
+
+	pb "github.com/conseweb/supervisor/protos"
+	"github.com/globalways/common/logger"
 )
 
 type BlocksHashCache interface {
@@ -37,10 +39,10 @@ type blocksHashItem struct {
 	hash        string
 }
 
-func (this *defaultBlocksHashCache) GetFromBlocksHashCache(highBlockNumber, lowBlockBumber uint64, hashAlgo pb.HashAlgo) (string, bool) {
-	key := this.blocksHashCacheKey(highBlockNumber, lowBlockBumber, hashAlgo)
+func (c *defaultBlocksHashCache) GetFromBlocksHashCache(highBlockNumber, lowBlockBumber uint64, hashAlgo pb.HashAlgo) (string, bool) {
+	key := c.blocksHashCacheKey(highBlockNumber, lowBlockBumber, hashAlgo)
 
-	cache, ok := this.caches[key]
+	cache, ok := c.caches[key]
 	if !ok {
 		logger.Debugf("blockshash(%s) didn't hit the cache", key)
 		return "", false
@@ -50,12 +52,12 @@ func (this *defaultBlocksHashCache) GetFromBlocksHashCache(highBlockNumber, lowB
 	return cache.hash, true
 }
 
-func (this *defaultBlocksHashCache) SetBlocksHashToCache(highBlockNumber, lowBlockBumber uint64, hashAlgo pb.HashAlgo, hash string) bool {
-	key := this.blocksHashCacheKey(highBlockNumber, lowBlockBumber, hashAlgo)
+func (c *defaultBlocksHashCache) SetBlocksHashToCache(highBlockNumber, lowBlockBumber uint64, hashAlgo pb.HashAlgo, hash string) bool {
+	key := c.blocksHashCacheKey(highBlockNumber, lowBlockBumber, hashAlgo)
 
-	if _, ok := this.caches[key]; !ok {
+	if _, ok := c.caches[key]; !ok {
 		logger.Debugf("blockshash(%s) set to the cache", key)
-		this.caches[key] = &blocksHashItem{
+		c.caches[key] = &blocksHashItem{
 			blocksRange: &pb.BlocksRange{
 				HighBlockNumber: highBlockNumber,
 				LowBlockNumber:  lowBlockBumber,
@@ -70,12 +72,12 @@ func (this *defaultBlocksHashCache) SetBlocksHashToCache(highBlockNumber, lowBlo
 	return false
 }
 
-func (this *defaultBlocksHashCache) Close() error {
-	this.caches = nil
+func (c *defaultBlocksHashCache) Close() error {
+	c.caches = nil
 	return nil
 }
 
-func (this *defaultBlocksHashCache) blocksHashCacheKey(highBlockNumber, lowBlockBumber uint64, hashAlgo pb.HashAlgo) string {
+func (c *defaultBlocksHashCache) blocksHashCacheKey(highBlockNumber, lowBlockBumber uint64, hashAlgo pb.HashAlgo) string {
 	return HASH(pb.HashAlgo_SHA256, []byte(fmt.Sprintf("%v/%v/%s", highBlockNumber, lowBlockBumber, hashAlgo.String())))
 }
 

@@ -16,14 +16,15 @@ limitations under the License.
 package account
 
 import (
+	"errors"
+	"sync"
+	"time"
+
 	"github.com/conseweb/supervisor/account/store"
 	pb "github.com/conseweb/supervisor/protos"
 	"github.com/looplab/fsm"
 	"github.com/op/go-logging"
 	"github.com/spf13/viper"
-	"sync"
-	"time"
-	"errors"
 )
 
 const (
@@ -92,7 +93,7 @@ func getController() *FarmerAccountController {
 func NewFarmerHandler(farmerId string) (*FarmerAccountHandler, error) {
 	return getController().NewFarmerHandler(farmerId)
 }
-func (this *FarmerAccountController) NewFarmerHandler(farmerId string) (handler *FarmerAccountHandler, err error) {
+func (ctr *FarmerAccountController) NewFarmerHandler(farmerId string) (handler *FarmerAccountHandler, err error) {
 	if farmerId == "" {
 		err = errors.New("farmerId is empty")
 		return
@@ -102,9 +103,9 @@ func (this *FarmerAccountController) NewFarmerHandler(farmerId string) (handler 
 	// 1. looking farmer from account tree
 	{
 		handler = &FarmerAccountHandler{}
-		this.l.RLock()
-		handler, err = this.accountTree.Get(key)
-		this.l.RUnlock()
+		ctr.l.RLock()
+		handler, err = ctr.accountTree.Get(key)
+		ctr.l.RUnlock()
 		if err == nil {
 			return
 		}
@@ -124,19 +125,19 @@ func (this *FarmerAccountController) NewFarmerHandler(farmerId string) (handler 
 	{
 		handler = &FarmerAccountHandler{}
 		var farmerBytes []byte
-		this.l.RLock()
-		farmerBytes, err = this.accountStorage.Get([]byte(key))
-		this.l.RUnlock()
+		ctr.l.RLock()
+		farmerBytes, err = ctr.accountStorage.Get([]byte(key))
+		ctr.l.RUnlock()
 		if err == nil {
 			handler.account, err = bytes2FarmerAccount(farmerBytes)
 			if err == nil {
 				handler.fsm = tmpFsm
 				handler.account.State = pb.FarmerState(pb.FarmerState_value[handler.fsm.Current()])
 
-				this.l.Lock()
+				ctr.l.Lock()
 				// put into account tree
-				this.accountTree.Put(key, handler)
-				this.l.Unlock()
+				ctr.accountTree.Put(key, handler)
+				ctr.l.Unlock()
 
 				return
 			}
@@ -146,7 +147,7 @@ func (this *FarmerAccountController) NewFarmerHandler(farmerId string) (handler 
 	// 3 if can not load farmer account info from tree & storage, new a farmer account info
 	{
 		handler = &FarmerAccountHandler{}
-		this.l.Lock()
+		ctr.l.Lock()
 		handler.account = &pb.FarmerAccount{
 			FarmerID:         farmerId,
 			Balance:          0,
@@ -155,11 +156,11 @@ func (this *FarmerAccountController) NewFarmerHandler(farmerId string) (handler 
 		}
 		handler.fsm = tmpFsm
 		// put into account tree
-		this.accountTree.Put(key, handler)
+		ctr.accountTree.Put(key, handler)
 		if farmerBytes, err := farmerAccount2Bytes(handler.account); err == nil {
-			this.asyncPersistFarmerBytes([]byte(key), farmerBytes)
+			ctr.asyncPersistFarmerBytes([]byte(key), farmerBytes)
 		}
-		this.l.Unlock()
+		ctr.l.Unlock()
 
 		return
 	}
@@ -169,33 +170,33 @@ func UpdateFarmerHandler(handler *FarmerAccountHandler) {
 	getController().UpdateFarmerHandler(handler)
 }
 
-func (this *FarmerAccountController) UpdateFarmerHandler(handler *FarmerAccountHandler) {
+func (ctr *FarmerAccountController) UpdateFarmerHandler(handler *FarmerAccountHandler) {
 	key := farmerId2Key(handler.account.FarmerID)
 
-	this.l.Lock()
+	ctr.l.Lock()
 	if farmerBytes, err := farmerAccount2Bytes(handler.account); err == nil {
 		// save back 2 memory
 		if handler.account.State != pb.FarmerState_OFFLINE {
-			this.accountTree.Put(key, handler)
+			ctr.accountTree.Put(key, handler)
 		} else {
-			this.accountTree.Delete(key)
+			ctr.accountTree.Delete(key)
 		}
 
-		this.asyncPersistFarmerBytes([]byte(key), farmerBytes)
+		ctr.asyncPersistFarmerBytes([]byte(key), farmerBytes)
 	}
-	this.l.Unlock()
+	ctr.l.Unlock()
 }
 
 // close the backend storage
 func Close() error {
 	return getController().Close()
 }
-func (this *FarmerAccountController) Close() error {
-	this.accountTree = nil
-	return this.accountStorage.Close()
+func (ctr *FarmerAccountController) Close() error {
+	ctr.accountTree = nil
+	return ctr.accountStorage.Close()
 }
 
-func (this *FarmerAccountController) asyncPersistFarmerBytes(farmerKey, farmerBytes []byte) {
+func (ctr *FarmerAccountController) asyncPersistFarmerBytes(farmerKey, farmerBytes []byte) {
 	// save back 2 storage, async
-	go this.accountStorage.Set(farmerKey, farmerBytes)
+	go ctr.accountStorage.Set(farmerKey, farmerBytes)
 }

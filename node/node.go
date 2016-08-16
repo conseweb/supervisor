@@ -16,6 +16,11 @@ limitations under the License.
 package node
 
 import (
+	"net"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/conseweb/supervisor/account"
 	"github.com/conseweb/supervisor/api"
 	"github.com/conseweb/supervisor/challenge"
@@ -24,10 +29,6 @@ import (
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"net"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
 const (
