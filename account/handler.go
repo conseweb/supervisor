@@ -82,13 +82,9 @@ func (this *FarmerAccountHandler) afterEvent() {
 
 	time.AfterFunc(nextPingInterval(), func() {
 		this.lostCount++
-		if this.fsm.Can("lost") {
-			this.Lost()
-		}
+		this.Lost()
 		if this.lostCount >= viper.GetInt("farmer.ping.lostcount") {
-			if this.fsm.Can("offline") {
-				this.OffLine()
-			}
+			this.OffLine()
 		}
 	})
 
@@ -96,9 +92,11 @@ func (this *FarmerAccountHandler) afterEvent() {
 }
 
 func (this *FarmerAccountHandler) OnLine() error {
-	if err := this.fsm.Event("online"); err != nil {
-		logger.Errorf("farmer online return err: %v", err)
-		return err
+	if this.fsm.Can("online") {
+		if err := this.fsm.Event("online"); err != nil {
+			logger.Errorf("farmer online return err: %v", err)
+			return err
+		}
 	}
 
 	this.lostCount = 0
@@ -152,9 +150,11 @@ func (this *FarmerAccountHandler) Lost() error {
 		return errors.New("current lost count <= 0")
 	}
 
-	if err := this.fsm.Event("lost"); err != nil {
-		logger.Errorf("farmer lost return err: %v", err)
-		return err
+	if this.fsm.Can("lost") {
+		if err := this.fsm.Event("lost"); err != nil {
+			logger.Errorf("farmer lost return err: %v", err)
+			return err
+		}
 	}
 
 	this.afterEvent()
@@ -163,9 +163,11 @@ func (this *FarmerAccountHandler) Lost() error {
 }
 
 func (this *FarmerAccountHandler) OffLine() error {
-	if err := this.fsm.Event("offline"); err != nil {
-		logger.Errorf("farmer offline return err: %v", err)
-		return err
+	if this.fsm.Can("offline") {
+		if err := this.fsm.Event("offline"); err != nil {
+			logger.Errorf("farmer offline return err: %v", err)
+			return err
+		}
 	}
 
 	this.lostCount = 0
