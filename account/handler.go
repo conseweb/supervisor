@@ -97,6 +97,8 @@ func (this *FarmerAccountHandler) OnLine() error {
 			logger.Errorf("farmer online return err: %v", err)
 			return err
 		}
+	} else {
+		return errors.New("already online, can not override.")
 	}
 
 	this.lostCount = 0
@@ -189,9 +191,8 @@ func farmerId2Key(farmerId string) string {
 }
 
 // marshal farmer account 2 proto bytes
-// if there is an error, return nil
-func (this *FarmerAccountHandler) marshal() ([]byte, error) {
-	accountBytes, err := proto.Marshal(this.account)
+func farmerAccount2Bytes(account *pb.FarmerAccount) ([]byte, error)  {
+	accountBytes, err := proto.Marshal(account)
 	if err != nil {
 		logger.Errorf("marshal farmer account err: %v", err)
 		return nil, err
@@ -201,15 +202,16 @@ func (this *FarmerAccountHandler) marshal() ([]byte, error) {
 }
 
 // unmarshal proto bytes 2 farmer account
-func (this *FarmerAccountHandler) unmarshal(fBytes []byte) error {
-	this.account = &pb.FarmerAccount{}
-	if err := proto.Unmarshal(fBytes, this.account); err != nil {
+func bytes2FarmerAccount(fBytes []byte) (*pb.FarmerAccount, error) {
+	account := &pb.FarmerAccount{}
+	if err := proto.Unmarshal(fBytes, account); err != nil {
 		logger.Errorf("unmarshal farmer account err: %v", err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return account, nil
 }
+
 
 func nextPingInterval() time.Duration {
 	basicInterval := viper.GetInt("farmer.ping.interval")

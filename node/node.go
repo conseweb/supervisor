@@ -40,12 +40,6 @@ var (
 )
 
 func StartNode() {
-	defer func() {
-		if x := recover(); x != nil {
-			logger.Errorf("caught panic: %v", x)
-		}
-	}()
-
 	addr := viper.GetString("node.address")
 	if addr == "" {
 		addr = default_addr

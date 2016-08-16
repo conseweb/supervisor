@@ -18,15 +18,10 @@ package account
 import (
 	"os"
 	"path/filepath"
-	"testing"
 	"time"
 	"github.com/spf13/viper"
 	"gopkg.in/check.v1"
 )
-
-func TestAccount(t *testing.T) {
-	check.TestingT(t)
-}
 
 type TestFarmerAccount struct {
 }

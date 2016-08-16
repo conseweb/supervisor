@@ -38,17 +38,24 @@ func (this *FarmerPublic) FarmerOnLine(ctx context.Context, req *pb.FarmerOnLine
 	rsp := &pb.FarmerOnLineRsp{
 		Error: pb.ResponseOK(),
 	}
-	handler := account.NewFarmerHandler(req.FarmerID)
+	handler, err := account.NewFarmerHandler(req.FarmerID)
+	if err != nil {
+		rsp.Error = pb.NewError(pb.ErrorType_INVALID_PARAMS, err.Error())
+
+		goto RET
+	}
 
 	// online
 	if err := handler.OnLine(); err != nil {
 		rsp.Error = pb.NewErrorf(pb.ErrorType_FARMER_ONLINE, "online return err: %v", err)
-		return rsp, nil
+
+		goto RET
 	}
 
 	rsp.Account = handler.Account()
 	rsp.NextPing = handler.NextPingTime()
 
+RET:
 	return rsp, nil
 }
 
@@ -58,11 +65,23 @@ func (this *FarmerPublic) FarmerPing(ctx context.Context, req *pb.FarmerPingReq)
 	rsp := &pb.FarmerPingRsp{
 		Error: pb.ResponseOK(),
 	}
-	handler := account.NewFarmerHandler(req.FarmerID)
+	handler, err := account.NewFarmerHandler(req.FarmerID)
+	if err != nil {
+		rsp.Error = pb.NewError(pb.ErrorType_INVALID_PARAMS, err.Error())
+
+		goto RET
+	}
+
+	if req.BlocksRange == nil {
+		rsp.Error = pb.NewError(pb.ErrorType_INVALID_PARAMS, "request blocks range is nil.")
+
+		goto RET
+	}
 
 	if need, brange, hashAlgo, err := handler.Ping(req.BlocksRange.HighBlockNumber, req.BlocksRange.LowBlockNumber); err != nil {
 		rsp.Error = pb.NewError(pb.ErrorType_FARMER_ONLINE, err.Error())
-		return rsp, nil
+
+		goto RET
 	} else {
 		rsp.NeedChallenge = need
 		rsp.BlocksRange = brange
@@ -77,6 +96,7 @@ func (this *FarmerPublic) FarmerPing(ctx context.Context, req *pb.FarmerPingReq)
 	rsp.Account = handler.Account()
 	rsp.NextPing = handler.NextPingTime()
 
+RET:
 	return rsp, nil
 }
 
@@ -86,18 +106,30 @@ func (this *FarmerPublic) FarmerConquerChallenge(ctx context.Context, req *pb.Fa
 	rsp := &pb.FarmerConquerChallengeRsp{
 		Error: pb.ResponseOK(),
 	}
-	handler := account.NewFarmerHandler(req.FarmerID)
+	handler, err := account.NewFarmerHandler(req.FarmerID)
+	if err != nil {
+		rsp.Error = pb.NewError(pb.ErrorType_INVALID_PARAMS, err.Error())
+
+		goto RET
+	}
+
+	if req.BlocksRange == nil {
+		rsp.Error = pb.NewError(pb.ErrorType_INVALID_PARAMS, "request blocks range is nil.")
+
+		goto RET
+	}
 
 	if err := handler.ConquerChallenge(req.BlocksRange.HighBlockNumber, req.BlocksRange.LowBlockNumber, req.HashAlgo, req.BlocksHash); err != nil {
 		rsp.ConquerOK = false
 		rsp.Error = pb.NewErrorf(pb.ErrorType_FARMER_CHALLENGE_FAIL, "challenge fail: %v", err)
 
-		return rsp, nil
+		goto RET
 	}
 
 	rsp.ConquerOK = true
 	rsp.Account = handler.Account()
 
+RET:
 	return rsp, nil
 }
 
@@ -107,15 +139,20 @@ func (this *FarmerPublic) FarmerOffLine(ctx context.Context, req *pb.FarmerOffLi
 	rsp := &pb.FarmerOffLineRsp{
 		Error: pb.ResponseOK(),
 	}
-	handler := account.NewFarmerHandler(req.FarmerID)
+	handler, err := account.NewFarmerHandler(req.FarmerID)
+	if err != nil {
+		rsp.Error = pb.NewError(pb.ErrorType_INVALID_PARAMS, err.Error())
+		goto RET
+	}
 
 	// offline event
 	if err := handler.OffLine(); err != nil {
 		rsp.Error = pb.NewErrorf(pb.ErrorType_FARMER_OFFLINE, "offline err: %v", err)
-		return rsp, nil
+		goto RET
 	}
 
 	rsp.Account = handler.Account()
 
+RET:
 	return rsp, nil
 }

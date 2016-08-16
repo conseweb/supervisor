@@ -28,6 +28,7 @@ enum ErrorType {
     FARMER_ONLINE = 1;
     FARMER_OFFLINE = 2;
     FARMER_CHALLENGE_FAIL = 3;
+    INVALID_PARAMS = 4;
 }
 
 message Error {
