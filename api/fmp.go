@@ -17,14 +17,12 @@ package api
 
 import (
 	"github.com/conseweb/supervisor/account"
-	"github.com/conseweb/supervisor/challenge"
 	pb "github.com/conseweb/supervisor/protos"
 	"github.com/op/go-logging"
 	"golang.org/x/net/context"
 )
 
 // TODO vairfy farmerid
-
 var (
 	logger = logging.MustGetLogger("supervisor")
 )
@@ -86,12 +84,6 @@ func (fmp *FarmerPublic) FarmerPing(ctx context.Context, req *pb.FarmerPingReq) 
 		rsp.NeedChallenge = need
 		rsp.BlocksRange = brange
 		rsp.HashAlgo = hashAlgo
-
-		// need challenge
-		if need {
-			// sv cache challenge req
-			challenge.GetFarmerChallengeReqCache().SetFarmerChallengeReq(req.FarmerID, brange.HighBlockNumber, brange.LowBlockNumber, hashAlgo)
-		}
 	}
 	rsp.Account = handler.Account()
 	rsp.NextPing = handler.NextPingTime()

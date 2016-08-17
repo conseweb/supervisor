@@ -28,10 +28,12 @@ import (
 )
 
 type FarmerAccountHandler struct {
-	account      *pb.FarmerAccount
-	fsm          *fsm.FSM
-	lostCount    int
-	nextPingTime int64
+	account                *pb.FarmerAccount
+	fsm                    *fsm.FSM
+	lostCount              int
+	nextPingTime           int64
+	nextConquerTime        int64
+	nextFarmerChallengeReq *challenge.FarmerChallengeReq
 }
 
 // whether or not need challenge blocks hash
@@ -81,14 +83,6 @@ func (h *FarmerAccountHandler) afterEvent() {
 	h.account.LastModifiedTime = time.Now().UnixNano()
 	h.account.State = pb.FarmerState(pb.FarmerState_value[h.fsm.Current()])
 
-	time.AfterFunc(nextPingInterval(), func() {
-		h.lostCount++
-		h.Lost()
-		if h.lostCount >= viper.GetInt("farmer.ping.lostcount") {
-			h.OffLine()
-		}
-	})
-
 	UpdateFarmerHandler(h)
 }
 
@@ -117,6 +111,14 @@ func (h *FarmerAccountHandler) Ping(highBlockNumber, lowBlockNumber uint64) (nee
 	need, brange = h.needChallengeBlocks(highBlockNumber, lowBlockNumber)
 	if need {
 		hashAlgo = h.challengeHashAlgo()
+
+		// sv cache challenge req
+		req, set := challenge.GetFarmerChallengeReqCache().SetFarmerChallengeReq(h.account.FarmerID, brange.HighBlockNumber, brange.LowBlockNumber, hashAlgo)
+		if set {
+			// set handler's nextConquerTime and nextChallengeReq
+			h.nextConquerTime = time.Now().Add(nextChallengeDelay()).UnixNano()
+			h.nextFarmerChallengeReq = req
+		}
 	} else {
 		// if no need to challenge, just add balance h time
 		h.calcBalance()
@@ -130,22 +132,28 @@ func (h *FarmerAccountHandler) Ping(highBlockNumber, lowBlockNumber uint64) (nee
 
 func (h *FarmerAccountHandler) ConquerChallenge(highBlockNumber, lowBlockNumber uint64, hashAlgo pb.HashAlgo, blocksHash string) error {
 	if challenge.ConquerChallenge(h.account.FarmerID, highBlockNumber, lowBlockNumber, hashAlgo, blocksHash) {
-		// TODO calc farmer balance
 		h.calcBalance()
 	} else {
-		h.account.Balance = 0
+		h.punishBalance()
 		return errors.New("farmer conquer challenge fail")
 	}
 
 	h.lostCount = 0
 	h.account.LastChallengeTime = time.Now().UnixNano()
+	h.nextConquerTime = 0
+	h.nextFarmerChallengeReq = nil
 	h.afterEvent()
 
 	return nil
 }
 
+// TODO calc farmer balance
 func (h *FarmerAccountHandler) calcBalance() {
 	h.account.Balance += 100
+}
+
+func (h *FarmerAccountHandler) punishBalance() {
+	h.account.Balance = 0
 }
 
 func (h *FarmerAccountHandler) Lost() error {
@@ -173,7 +181,6 @@ func (h *FarmerAccountHandler) OffLine() error {
 		}
 	}
 
-	h.lostCount = 0
 	h.afterEvent()
 
 	return nil
@@ -214,27 +221,19 @@ func bytes2FarmerAccount(fBytes []byte) (*pb.FarmerAccount, error) {
 }
 
 func nextPingInterval() time.Duration {
-	basicInterval := viper.GetInt("farmer.ping.interval")
-	if basicInterval == 0 {
-		basicInterval = 900
+	if interval, err := time.ParseDuration(viper.GetString("farmer.ping.interval")); err == nil {
+		return interval
 	}
 
-	return time.Duration(basicInterval) * time.Second
+	viper.Set("farmer.ping.interval", "900s")
+	return time.Duration(900) * time.Second
+}
 
-	//up := viper.GetInt("farmer.ping.up")
-	//down := viper.GetInt("farmer.ping.down")
-	//
-	//interval := basicInterval
-	//upflag := (rand.Int() % 2) == 0
-	//if upflag {
-	//	interval += rand.Intn(up)
-	//} else {
-	//	interval -= rand.Intn(down)
-	//}
-	//
-	//if interval < 0 {
-	//	interval = basicInterval
-	//}
-	//
-	//return time.Duration(interval) * time.Second
+func nextChallengeDelay() time.Duration {
+	if delay, err := time.ParseDuration(viper.GetString("farmer.challenge.delay")); err == nil {
+		return delay
+	}
+
+	viper.Set("farmer.challenge.delay", "10s")
+	return time.Duration(10) * time.Second
 }

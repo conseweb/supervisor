@@ -25,6 +25,8 @@ import (
 	"github.com/looplab/fsm"
 	"github.com/op/go-logging"
 	"github.com/spf13/viper"
+	"github.com/conseweb/supervisor/utils/semaphore"
+	"github.com/conseweb/supervisor/challenge"
 )
 
 const (
@@ -83,6 +85,8 @@ func getController() *FarmerAccountController {
 			accountTree:    NewAccountTree(),
 			l:              &sync.RWMutex{},
 		}
+
+		go controller.checkHandlers()
 	})
 
 	return controller
@@ -196,7 +200,76 @@ func (ctr *FarmerAccountController) Close() error {
 	return ctr.accountStorage.Close()
 }
 
+// save back 2 storage, async
 func (ctr *FarmerAccountController) asyncPersistFarmerBytes(farmerKey, farmerBytes []byte) {
-	// save back 2 storage, async
 	go ctr.accountStorage.Set(farmerKey, farmerBytes)
+}
+
+// check handlers
+func (ctr *FarmerAccountController) checkHandlers() {
+	ticker := time.NewTicker(getControllerCheckInterval())
+	sema := semaphore.NewSemaphore(getControllerCheckWorkers())
+
+	for {
+		select {
+		case <-ticker.C:
+			logger.Infof("current farmer handler count: %d", ctr.accountTree.Len())
+
+			for _, key := range ctr.accountTree.Keys() {
+				sema.Acquire()
+				go func(key string) {
+					defer sema.Release()
+
+					h, err := ctr.accountTree.Get(key)
+					if err != nil {
+						logger.Errorf("get farmer handler err: %v", err)
+						return
+					}
+
+					// if handler's nextPingTime is before now, lostcount ++
+					if time.Unix(h.nextPingTime, 0).Before(time.Now()) {
+						h.lostCount++
+						h.Lost()
+
+						if h.lostCount >= viper.GetInt("farmer.ping.lostcount") {
+							h.OffLine()
+						}
+
+						ctr.UpdateFarmerHandler(h)
+					}
+
+					// if handler's nextConquerTime > 0, nextChallengeReq isn't nil, and is before now, punlish
+					if h.nextConquerTime > 0 && h.nextFarmerChallengeReq != nil && time.Unix(h.nextConquerTime, 0).Before(time.Now()) {
+						blocksRange := h.nextFarmerChallengeReq.BlocksRange()
+						challenge.GetFarmerChallengeReqCache().DelFarmerChallengeReq(h.nextFarmerChallengeReq.FarmerID(), blocksRange.HighBlockNumber, blocksRange.LowBlockNumber, h.nextFarmerChallengeReq.HashAlgo())
+
+						h.nextConquerTime = 0
+						h.nextFarmerChallengeReq = nil
+						h.punishBalance()
+
+						ctr.UpdateFarmerHandler(h)
+					}
+				}(key)
+			}
+		}
+	}
+}
+
+func getControllerCheckInterval() time.Duration {
+	if interval, err := time.ParseDuration(viper.GetString("account.check.interval")); err ==nil {
+		return interval
+	}
+
+	viper.Set("account.check.interval", "60s")
+	return time.Duration(60) * time.Second
+}
+
+func getControllerCheckWorkers() int {
+	workers := viper.GetInt("account.check.workers")
+	if workers <= 0 {
+		viper.Set("account.check.workers", 8)
+		workers = 8
+	}
+
+	return workers
 }

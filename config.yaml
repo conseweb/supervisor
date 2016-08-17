@@ -54,6 +54,13 @@ account:
         # where to store db file
         dbpath: ./testdata/trustchain/supervisor/account
 
+    check:
+      # interval of check account info, such as lostcount, conquer challenge etc.
+      # Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+      interval: 60s
+      # how many check processes can be working
+      workers: 8
+
 #####################################################################
 #
 # farmer section
@@ -61,11 +68,14 @@ account:
 #####################################################################
 farmer:
     ping:
-      # interval of time, farmer call for heartbeat, default is 900(s)
-      interval: 900
+      # interval of time, farmer call for heartbeat, default is 900s
+      # Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+      interval: 900s
       # after certain times of lost, superviosr change farmer's state to OFFLINE
       lostcount: 2
 
     challenge:
       # challenge hash algorithm, value can be MD5,SHA1,SHA224,SHA256,SHA384,SHA512,SHA3224,SHA3256,SHA3384,SHA3512
       hashalgo: SHA256
+      # max delay can stand for conquer challenge after ping
+      dalay: 10s

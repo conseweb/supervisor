@@ -26,7 +26,7 @@ import (
 // supervisor will store the random blocks range into cache,
 // in order to avoid farmer fake requests
 type FarmerChallengeCache interface {
-	SetFarmerChallengeReq(farmerId string, highBlockNumber, lowBlockNumber uint64, hashAlgo pb.HashAlgo) bool
+	SetFarmerChallengeReq(farmerId string, highBlockNumber, lowBlockNumber uint64, hashAlgo pb.HashAlgo) (*FarmerChallengeReq, bool)
 	GetFarmerChallengeReq(farmerId string, highBlockNumber, lowBlockNumber uint64, hashAlgo pb.HashAlgo) (*FarmerChallengeReq, bool)
 	DelFarmerChallengeReq(farmerId string, highBlockNumber, lowBlockNumber uint64, hashAlgo pb.HashAlgo)
 	Close() error
@@ -42,16 +42,35 @@ type FarmerChallengeReq struct {
 	hashAlgo    pb.HashAlgo
 }
 
+func (r *FarmerChallengeReq) FarmerID() string {
+	return r.farmerId
+}
+
+func (r *FarmerChallengeReq) BlocksRange() *pb.BlocksRange {
+	if r.blocksRange != nil {
+		return r.blocksRange
+	}
+
+	return &pb.BlocksRange{
+		HighBlockNumber: 0,
+		LowBlockNumber: 0,
+	}
+}
+
+func (r *FarmerChallengeReq) HashAlgo() pb.HashAlgo {
+	return r.hashAlgo
+}
+
 func (c *defaultFarmerChallengeReqCache) cachekey(farmerId string, highBlockNumber, lowBlockNumber uint64, hashAlgo pb.HashAlgo) string {
 	return HASH(pb.HashAlgo_SHA256, []byte(fmt.Sprintf("%s/%v/%v/%s", farmerId, highBlockNumber, lowBlockNumber, hashAlgo.String())))
 }
 
-func (c *defaultFarmerChallengeReqCache) SetFarmerChallengeReq(farmerId string, highBlockNumber, lowBlockNumber uint64, hashAlgo pb.HashAlgo) bool {
+func (c *defaultFarmerChallengeReqCache) SetFarmerChallengeReq(farmerId string, highBlockNumber, lowBlockNumber uint64, hashAlgo pb.HashAlgo) (*FarmerChallengeReq, bool) {
 	key := c.cachekey(farmerId, highBlockNumber, lowBlockNumber, hashAlgo)
 
 	if _, ok := c.caches[key]; !ok {
 		logger.Debugf("challengeReq(%s) set to the cache", key)
-		c.caches[key] = &FarmerChallengeReq{
+		req := &FarmerChallengeReq{
 			farmerId: farmerId,
 			blocksRange: &pb.BlocksRange{
 				HighBlockNumber: highBlockNumber,
@@ -59,11 +78,12 @@ func (c *defaultFarmerChallengeReqCache) SetFarmerChallengeReq(farmerId string, 
 			},
 			hashAlgo: hashAlgo,
 		}
+		c.caches[key] = req
 
-		return true
+		return req, true
 	}
 
-	return false
+	return nil, false
 }
 
 func (c *defaultFarmerChallengeReqCache) GetFarmerChallengeReq(farmerId string, highBlockNumber, lowBlockNumber uint64, hashAlgo pb.HashAlgo) (*FarmerChallengeReq, bool) {
