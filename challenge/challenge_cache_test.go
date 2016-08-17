@@ -33,12 +33,15 @@ func (t *TestFarmerChallengeCache) SetUpSuite(c *check.C) {
 }
 
 func (t *TestFarmerChallengeCache) TestSetFarmerChallengeReq(c *check.C) {
-	c.Check(GetFarmerChallengeReqCache().SetFarmerChallengeReq("farmerId001", 100, 20, pb.HashAlgo_SHA1), check.Equals, true)
-	c.Check(GetFarmerChallengeReqCache().SetFarmerChallengeReq("farmerId001", 100, 20, pb.HashAlgo_SHA1), check.Equals, false)
+	_, set := GetFarmerChallengeReqCache().SetFarmerChallengeReq("farmerId001", 100, 20, pb.HashAlgo_SHA1)
+	c.Check(set, check.Equals, true)
+	_, set1 := GetFarmerChallengeReqCache().SetFarmerChallengeReq("farmerId001", 100, 20, pb.HashAlgo_SHA1)
+	c.Check(set1, check.Equals, false)
 }
 
 func (t *TestFarmerChallengeCache) TestGetFarmerChallengeReq(c *check.C) {
-	c.Check(GetFarmerChallengeReqCache().SetFarmerChallengeReq("farmerId002", 100, 20, pb.HashAlgo_SHA1), check.Equals, true)
+	_, set := GetFarmerChallengeReqCache().SetFarmerChallengeReq("farmerId002", 100, 20, pb.HashAlgo_SHA1)
+	c.Check(set, check.Equals, true)
 
 	req, get := GetFarmerChallengeReqCache().GetFarmerChallengeReq("farmerId002", 100, 20, pb.HashAlgo_SHA1)
 	c.Check(get, check.Equals, true)
@@ -46,7 +49,8 @@ func (t *TestFarmerChallengeCache) TestGetFarmerChallengeReq(c *check.C) {
 }
 
 func (t *TestFarmerChallengeCache) TestDelFarmerChallengeReq(c *check.C) {
-	c.Check(GetFarmerChallengeReqCache().SetFarmerChallengeReq("farmerId003", 100, 20, pb.HashAlgo_SHA1), check.Equals, true)
+	_, set := GetFarmerChallengeReqCache().SetFarmerChallengeReq("farmerId003", 100, 20, pb.HashAlgo_SHA1)
+	c.Check(set, check.Equals, true)
 
 	req, get := GetFarmerChallengeReqCache().GetFarmerChallengeReq("farmerId003", 100, 20, pb.HashAlgo_SHA1)
 	c.Check(get, check.Equals, true)

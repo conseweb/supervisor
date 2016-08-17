@@ -33,8 +33,6 @@ func (t *TestFarmerAccount) SetUpSuite(c *check.C) {
 	viper.Set("account.store.backend", "rocksdb")
 	viper.Set("account.store.rocksdb.dbpath", filepath.Join(os.TempDir(), "testAccount"))
 	viper.Set("farmer.ping.interval", 900)
-	viper.Set("farmer.ping.up", 900)
-	viper.Set("farmer.ping.down", 800)
 	viper.Set("farmer.ping.lostcount", 2)
 	viper.Set("farmer.challenge.hashalgo", "SHA256")
 }
