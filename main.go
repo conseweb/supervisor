@@ -16,72 +16,39 @@ limitations under the License.
 package main
 
 import (
-	"os"
-	"path/filepath"
-	"strings"
-
+	"github.com/conseweb/common/config"
 	"github.com/conseweb/supervisor/node"
+	"github.com/hyperledger/fabric/flogging"
 	"github.com/op/go-logging"
 	"github.com/spf13/viper"
 	"gopkg.in/alecthomas/kingpin.v2"
+	"os"
 )
 
 const (
-	appName = "tcsv"
+	appName = "supervisor"
 )
 
 var (
-	logger = logging.MustGetLogger("supervisor")
-
-	app = kingpin.New(appName, "A command-line trust-chain supervisor cli.")
-
+	logger = logging.MustGetLogger("main")
+	app    = kingpin.New(appName, "A command-line trust-chain supervisor cli.")
 	svnode = app.Command("node", "Supervisor Node")
 )
 
 func init() {
 	// load configure
-	loadConfigure()
-
-	level, err := logging.LogLevel(viper.GetString("server.logging"))
-	if err != nil {
-		logger.Fatalf("set logging level err: %v", level)
+	if err := config.LoadConfig("SUPERVISOR", "supervisor", "github.com/conseweb/supervisor"); err != nil {
+		// Handle errors reading the config file
+		logger.Panicf("Fatal error config file: %s \n", err)
 	}
 
-	logging.SetLevel(level, "supervisor")
+	flogging.LoggingInit("main")
 }
 
 func main() {
-
 	app.Version(viper.GetString("server.version"))
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
 	case svnode.FullCommand():
 		node.StartNode()
-	}
-}
-
-func loadConfigure() {
-	// Now set the configuration file
-	viper.SetEnvPrefix(strings.ToUpper(appName))
-	viper.AutomaticEnv()
-	replacer := strings.NewReplacer(".", "_")
-	viper.SetEnvKeyReplacer(replacer)
-
-	viper.SetConfigName("config") // name of config file (without extension)
-
-	alternativeCfgPath := os.Getenv("TCSV_CFG_PATH")
-	if alternativeCfgPath != "" {
-		logger.Info("User defined config file path: %s", alternativeCfgPath)
-		viper.AddConfigPath(alternativeCfgPath)
-	} else {
-		viper.AddConfigPath("./")
-		for _, p := range filepath.SplitList(os.Getenv("GOPATH")) {
-			viper.AddConfigPath(filepath.Join(p, "src/github.com/conseweb/supervisor"))
-		}
-	}
-
-	viper.AddConfigPath("./")   // path to look for the config file in
-	err := viper.ReadInConfig() // Find and read the config file
-	if err != nil {             // Handle errors reading the config file
-		logger.Panicf("Fatal error config file: %s \n", err)
 	}
 }

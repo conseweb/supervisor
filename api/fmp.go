@@ -16,6 +16,7 @@ limitations under the License.
 package api
 
 import (
+	cpb "github.com/conseweb/common/protos"
 	"github.com/conseweb/supervisor/account"
 	pb "github.com/conseweb/supervisor/protos"
 	"github.com/op/go-logging"
@@ -34,18 +35,18 @@ func (fmp *FarmerPublic) FarmerOnLine(ctx context.Context, req *pb.FarmerOnLineR
 	logger.Debugf("new connect for FarmerOnLine, req: %+v", req)
 
 	rsp := &pb.FarmerOnLineRsp{
-		Error: pb.ResponseOK(),
+		Error: cpb.ResponseOK(),
 	}
 	handler, err := account.NewFarmerHandler(req.FarmerID)
 	if err != nil {
-		rsp.Error = pb.NewError(pb.ErrorType_INVALID_PARAMS, err.Error())
+		rsp.Error = cpb.NewError(cpb.ErrorType_INVALID_PARAM, err.Error())
 
 		goto RET
 	}
 
 	// online
 	if err := handler.OnLine(); err != nil {
-		rsp.Error = pb.NewErrorf(pb.ErrorType_FARMER_ONLINE, "online return err: %v", err)
+		rsp.Error = cpb.NewErrorf(cpb.ErrorType_INVALID_STATE_FARMER_ONLINE, "online return err: %v", err)
 
 		goto RET
 	}
@@ -61,23 +62,23 @@ func (fmp *FarmerPublic) FarmerPing(ctx context.Context, req *pb.FarmerPingReq) 
 	logger.Debugf("new connect for FarmerPing, req: %+v", req)
 
 	rsp := &pb.FarmerPingRsp{
-		Error: pb.ResponseOK(),
+		Error: cpb.ResponseOK(),
 	}
 	handler, err := account.NewFarmerHandler(req.FarmerID)
 	if err != nil {
-		rsp.Error = pb.NewError(pb.ErrorType_INVALID_PARAMS, err.Error())
+		rsp.Error = cpb.NewError(cpb.ErrorType_INVALID_PARAM, err.Error())
 
 		goto RET
 	}
 
 	if req.BlocksRange == nil {
-		rsp.Error = pb.NewError(pb.ErrorType_INVALID_PARAMS, "request blocks range is nil.")
+		rsp.Error = cpb.NewError(cpb.ErrorType_INVALID_PARAM, "request blocks range is nil.")
 
 		goto RET
 	}
 
 	if need, brange, hashAlgo, err := handler.Ping(req.BlocksRange.HighBlockNumber, req.BlocksRange.LowBlockNumber); err != nil {
-		rsp.Error = pb.NewError(pb.ErrorType_FARMER_ONLINE, err.Error())
+		rsp.Error = cpb.NewError(cpb.ErrorType_INVALID_STATE_FARMER_ONLINE, err.Error())
 
 		goto RET
 	} else {
@@ -96,24 +97,24 @@ func (fmp *FarmerPublic) FarmerConquerChallenge(ctx context.Context, req *pb.Far
 	logger.Debugf("new connect for FarmerConquerChallenge, req: %+v", req)
 
 	rsp := &pb.FarmerConquerChallengeRsp{
-		Error: pb.ResponseOK(),
+		Error: cpb.ResponseOK(),
 	}
 	handler, err := account.NewFarmerHandler(req.FarmerID)
 	if err != nil {
-		rsp.Error = pb.NewError(pb.ErrorType_INVALID_PARAMS, err.Error())
+		rsp.Error = cpb.NewError(cpb.ErrorType_INVALID_PARAM, err.Error())
 
 		goto RET
 	}
 
 	if req.BlocksRange == nil {
-		rsp.Error = pb.NewError(pb.ErrorType_INVALID_PARAMS, "request blocks range is nil.")
+		rsp.Error = cpb.NewError(cpb.ErrorType_INVALID_PARAM, "request blocks range is nil.")
 
 		goto RET
 	}
 
 	if err := handler.ConquerChallenge(req.BlocksRange.HighBlockNumber, req.BlocksRange.LowBlockNumber, req.HashAlgo, req.BlocksHash); err != nil {
 		rsp.ConquerOK = false
-		rsp.Error = pb.NewErrorf(pb.ErrorType_FARMER_CHALLENGE_FAIL, "challenge fail: %v", err)
+		rsp.Error = cpb.NewErrorf(cpb.ErrorType_FARMER_CHALLENGE_FAIL, "challenge fail: %v", err)
 
 		goto RET
 	}
@@ -129,17 +130,17 @@ func (fmp *FarmerPublic) FarmerOffLine(ctx context.Context, req *pb.FarmerOffLin
 	logger.Debugf("new connect for FarmerOffLine, req: %+v", req)
 
 	rsp := &pb.FarmerOffLineRsp{
-		Error: pb.ResponseOK(),
+		Error: cpb.ResponseOK(),
 	}
 	handler, err := account.NewFarmerHandler(req.FarmerID)
 	if err != nil {
-		rsp.Error = pb.NewError(pb.ErrorType_INVALID_PARAMS, err.Error())
+		rsp.Error = cpb.NewError(cpb.ErrorType_INVALID_PARAM, err.Error())
 		goto RET
 	}
 
 	// offline event
 	if err := handler.OffLine(); err != nil {
-		rsp.Error = pb.NewErrorf(pb.ErrorType_FARMER_OFFLINE, "offline err: %v", err)
+		rsp.Error = cpb.NewErrorf(cpb.ErrorType_INVALID_STATE_FARMER_OFFLINE, "offline err: %v", err)
 		goto RET
 	}
 

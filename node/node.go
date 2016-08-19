@@ -21,12 +21,16 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/conseweb/common/clientconn"
+	ipb "github.com/conseweb/idprovider/protos"
 	"github.com/conseweb/supervisor/account"
 	"github.com/conseweb/supervisor/api"
 	"github.com/conseweb/supervisor/challenge"
 	pb "github.com/conseweb/supervisor/protos"
+	"github.com/hyperledger/fabric/flogging"
 	"github.com/op/go-logging"
 	"github.com/spf13/viper"
+	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -36,11 +40,16 @@ const (
 )
 
 var (
-	logger = logging.MustGetLogger("supervisor")
+	logger = logging.MustGetLogger("node")
 	server *grpc.Server
 )
 
 func StartNode() {
+	flogging.LoggingInit("node")
+
+	// verify supervisor ok or not
+	verifySupervisor()
+
 	addr := viper.GetString("node.address")
 	if addr == "" {
 		addr = default_addr
@@ -107,4 +116,41 @@ func initTLSForServer() credentials.TransportCredentials {
 	}
 
 	return creds
+}
+
+func verifySupervisor() {
+	logger.Info("begin to verify supervisor via idprovider")
+
+	var conn *grpc.ClientConn
+	var err error
+	address := viper.GetString("idprovider.port")
+	tlsEnable := viper.GetBool("idprovider.tls.enabled")
+	if tlsEnable {
+		hostoverride := viper.GetString("idprovider.tls.serverhostoverride")
+		certFile := viper.GetString("idprovider.tls.cert.file")
+		conn, err = clientconn.NewClientConnectionWithAddress(address, true, true, clientconn.InitTLSForClient(hostoverride, certFile))
+	} else {
+		conn, err = clientconn.NewClientConnectionWithAddress(address, true, false, nil)
+	}
+	if err != nil {
+		logger.Fatalf("connect with idprovider return error: %v", err)
+	}
+	defer conn.Close()
+
+	idpaCli := ipb.NewIDPAClient(conn)
+	rsp, err := idpaCli.VerifyDevice(context.Background(), &ipb.VerifyDeviceReq{
+		UserID:      viper.GetString("node.svorg"),
+		DeviceID:    viper.GetString("node.svid"),
+		DeviceAlias: viper.GetString("node.svalias"),
+		For:         ipb.DeviceFor_SUPERVISOR,
+	})
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	if !rsp.Error.OK() {
+		logger.Fatalf("varify supervisor via idprovider return error: %v", rsp.Error)
+	}
+
+	logger.Info("finish verify supervisor via idprovider, OK")
 }
