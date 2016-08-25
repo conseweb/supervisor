@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"sync"
 
-	pb "github.com/conseweb/supervisor/protos"
+	pb "github.com/conseweb/common/protos"
 )
 
 type BlocksHashCache interface {

@@ -16,7 +16,7 @@ limitations under the License.
 package challenge
 
 import (
-	pb "github.com/conseweb/supervisor/protos"
+	pb "github.com/conseweb/common/protos"
 	"gopkg.in/check.v1"
 )
 

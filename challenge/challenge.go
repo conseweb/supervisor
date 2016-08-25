@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"strings"
 
-	pb "github.com/conseweb/supervisor/protos"
+	pb "github.com/conseweb/common/protos"
 	"github.com/hyperledger/fabric/core/ledger"
 	"github.com/op/go-logging"
 )

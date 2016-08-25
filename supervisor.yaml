@@ -110,3 +110,4 @@ logging:
     main: debug
     cli: debug
     node: debug
+    api: debug

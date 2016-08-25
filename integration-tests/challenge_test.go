@@ -1,11 +1,10 @@
 package main
 
 import (
-	"time"
-	pb "github.com/conseweb/supervisor/protos"
-	cpb "github.com/conseweb/common/protos"
+	pb "github.com/conseweb/common/protos"
 	"golang.org/x/net/context"
 	"gopkg.in/check.v1"
+	"time"
 )
 
 func (f *FarmerSuite) TestChallenge(c *check.C) {
@@ -37,7 +36,7 @@ func challengeAccount(c *check.C, client pb.FarmerPublicClient, hstr string, hAl
 	c.Assert(res, check.NotNil)
 
 	c.Logf("error: %+v", res.Error)
-	c.Assert(res.Error.ErrorType, check.Equals, cpb.ErrorType(cpb.ErrorType_NONE_ERROR))
+	c.Assert(res.Error.ErrorType, check.Equals, pb.ErrorType(pb.ErrorType_NONE_ERROR))
 
 	c.Assert(res.ConquerOK, check.Equals, true)
 }

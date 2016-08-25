@@ -21,7 +21,7 @@ import (
 	"time"
 
 	"github.com/conseweb/supervisor/challenge"
-	pb "github.com/conseweb/supervisor/protos"
+	pb "github.com/conseweb/common/protos"
 	"github.com/golang/protobuf/proto"
 	"github.com/looplab/fsm"
 	"github.com/spf13/viper"
