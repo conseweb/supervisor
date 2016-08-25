@@ -21,7 +21,7 @@ import (
 	"time"
 
 	"github.com/conseweb/supervisor/account/store"
-	pb "github.com/conseweb/supervisor/protos"
+	pb "github.com/conseweb/common/protos"
 	"github.com/looplab/fsm"
 	"github.com/op/go-logging"
 	"github.com/spf13/viper"

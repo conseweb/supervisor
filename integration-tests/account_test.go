@@ -1,8 +1,7 @@
 package main
 
 import (
-	pb "github.com/conseweb/supervisor/protos"
-	cpb "github.com/conseweb/common/protos"
+	pb "github.com/conseweb/common/protos"
 	"golang.org/x/net/context"
 	"gopkg.in/check.v1"
 )
@@ -12,10 +11,10 @@ func (f *FarmerSuite) TestAccount(c *check.C) {
 	client := pb.NewFarmerPublicClient(f.conn)
 
 	onRes := onlineAccount(c, client)
-	c.Assert(onRes.Error.ErrorType, check.Equals, cpb.ErrorType(cpb.ErrorType_INVALID_STATE_FARMER_ONLINE))
+	c.Assert(onRes.Error.ErrorType, check.Equals, pb.ErrorType(pb.ErrorType_INVALID_STATE_FARMER_ONLINE))
 
 	onlineAccount(c, client)
-	c.Assert(onRes.Error.ErrorType, check.Equals, cpb.ErrorType(cpb.ErrorType_INVALID_STATE_FARMER_ONLINE))
+	c.Assert(onRes.Error.ErrorType, check.Equals, pb.ErrorType(pb.ErrorType_INVALID_STATE_FARMER_ONLINE))
 	defer offlineAccount(c, client)
 	pingAccount(c, client)
 
@@ -46,7 +45,7 @@ func pingAccount(c *check.C, client pb.FarmerPublicClient) *pb.FarmerPingRsp {
 	c.Assert(res, check.NotNil)
 
 	c.Logf("error: %+v", res.Error)
-	c.Assert(res.Error.ErrorType, check.Equals, cpb.ErrorType(cpb.ErrorType_NONE_ERROR))
+	c.Assert(res.Error.ErrorType, check.Equals, pb.ErrorType(pb.ErrorType_NONE_ERROR))
 	return res
 }
 

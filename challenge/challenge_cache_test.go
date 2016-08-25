@@ -18,7 +18,7 @@ package challenge
 import (
 	"fmt"
 
-	pb "github.com/conseweb/supervisor/protos"
+	pb "github.com/conseweb/common/protos"
 	"github.com/op/go-logging"
 	"gopkg.in/check.v1"
 )

@@ -19,14 +19,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/conseweb/common/clientconn"
+	"github.com/conseweb/common/config"
+	pb "github.com/conseweb/common/protos"
 	"github.com/conseweb/supervisor/challenge"
-	pb "github.com/conseweb/supervisor/protos"
 	"github.com/spf13/viper"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"gopkg.in/check.v1"
-	"github.com/conseweb/common/clientconn"
-	"github.com/conseweb/common/config"
 )
 
 func Test(t *testing.T) {

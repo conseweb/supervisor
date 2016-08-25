@@ -22,11 +22,10 @@ import (
 	"syscall"
 
 	"github.com/conseweb/common/clientconn"
-	ipb "github.com/conseweb/idprovider/protos"
+	pb "github.com/conseweb/common/protos"
 	"github.com/conseweb/supervisor/account"
 	"github.com/conseweb/supervisor/api"
 	"github.com/conseweb/supervisor/challenge"
-	pb "github.com/conseweb/supervisor/protos"
 	"github.com/hyperledger/fabric/flogging"
 	"github.com/op/go-logging"
 	"github.com/spf13/viper"
@@ -70,6 +69,7 @@ func StartNode() {
 	server = grpc.NewServer(opts...)
 
 	// register
+	flogging.LoggingInit("api")
 	pb.RegisterFarmerPublicServer(server, &api.FarmerPublic{})
 
 	go server.Serve(lis)
@@ -137,12 +137,12 @@ func verifySupervisor() {
 	}
 	defer conn.Close()
 
-	idpaCli := ipb.NewIDPAClient(conn)
-	rsp, err := idpaCli.VerifyDevice(context.Background(), &ipb.VerifyDeviceReq{
+	idpaCli := pb.NewIDPAClient(conn)
+	rsp, err := idpaCli.VerifyDevice(context.Background(), &pb.VerifyDeviceReq{
 		UserID:      viper.GetString("node.svorg"),
 		DeviceID:    viper.GetString("node.svid"),
 		DeviceAlias: viper.GetString("node.svalias"),
-		For:         ipb.DeviceFor_SUPERVISOR,
+		For:         pb.DeviceFor_SUPERVISOR,
 	})
 	if err != nil {
 		logger.Fatal(err)

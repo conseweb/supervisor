@@ -21,7 +21,7 @@ import (
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
-	pb "github.com/conseweb/supervisor/protos"
+	pb "github.com/conseweb/common/protos"
 	"golang.org/x/crypto/sha3"
 	"hash"
 	"strings"

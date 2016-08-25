@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"sync"
 
-	pb "github.com/conseweb/supervisor/protos"
+	pb "github.com/conseweb/common/protos"
 )
 
 // once a farmer required to challenge the blocks hash,

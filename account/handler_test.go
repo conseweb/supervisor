@@ -16,7 +16,7 @@ limitations under the License.
 package account
 
 import (
-	pb "github.com/conseweb/supervisor/protos"
+	pb "github.com/conseweb/common/protos"
 	"gopkg.in/check.v1"
 )
 
