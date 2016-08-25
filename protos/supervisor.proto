@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package protos;
 
+import "github.com/conseweb/common/protos/error.proto";
+
 // farmer state
 enum FarmerState {
     OFFLINE = 0;
@@ -21,19 +23,6 @@ message FarmerAccount {
     int64 lastModifiedTime = 4;
     // last challenge blocks's hash's time
     int64 lastChallengeTime = 5;
-}
-
-enum ErrorType {
-    NONE_ERROR = 0;
-    FARMER_ONLINE = 1;
-    FARMER_OFFLINE = 2;
-    FARMER_CHALLENGE_FAIL = 3;
-    INVALID_PARAMS = 4;
-}
-
-message Error {
-    ErrorType errorType = 1;
-    string message = 2;
 }
 
 // farmer client can use the service to communicate with supervisor

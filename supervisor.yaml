@@ -13,8 +13,6 @@ server:
 
     # supervisor server version
     version: 0.1.0
-    # logging level
-    logging: debug
 
 ######################################################################
 #
@@ -24,6 +22,15 @@ server:
 node:
     # the address that the supervisor listenning on
     address: 0.0.0.0:9376
+
+    # sv belongs to a user(organization)
+    svorg: cd8b78aa-69da-11e6-8b85-6003088a18fa
+
+    # sv id
+    svid: 3000001fb0fb4800
+
+    # sv alias
+    svalias: supervisor_1
 
     # whether to trace RPCs using the golang.org/x/net/trace package
     trace: true
@@ -79,3 +86,27 @@ farmer:
       hashalgo: SHA256
       # max delay can stand for conquer challenge after ping
       dalay: 10s
+####################################################################
+#
+# idprovider section
+#
+####################################################################
+idprovider:
+    # port the CA services are listening on
+    port: ":7054"
+    # TLS certificate and key file paths
+    tls:
+        # whether or not to setup tls connection
+        enabled: false
+        cert:
+            file:
+        serverhostoverride:
+####################################################################
+#
+# Enabling/disabling different logging levels of the sv.
+#
+####################################################################
+logging:
+    main: debug
+    cli: debug
+    node: debug

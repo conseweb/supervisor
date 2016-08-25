@@ -16,19 +16,17 @@ limitations under the License.
 package node
 
 import (
-	"os"
-	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 
 	"github.com/conseweb/supervisor/challenge"
-	"github.com/conseweb/supervisor/cli"
 	pb "github.com/conseweb/supervisor/protos"
 	"github.com/spf13/viper"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"gopkg.in/check.v1"
+	"github.com/conseweb/common/clientconn"
+	"github.com/conseweb/common/config"
 )
 
 func Test(t *testing.T) {
@@ -43,14 +41,14 @@ type NodeTest struct {
 var _ = check.Suite(&NodeTest{})
 
 func (t *NodeTest) SetUpSuite(c *check.C) {
-	loadConfigure()
+	config.LoadConfig("SUPERVISOR", "supervisor", "github.com/conseweb/supervisor")
 
 	go StartNode()
 	time.Sleep(time.Second)
 }
 
 func (t *NodeTest) SetUpTest(c *check.C) {
-	conn, err := cli.NewClientConnectionWithAddress(viper.GetString("node.address"), true, false, nil)
+	conn, err := clientconn.NewClientConnectionWithAddress(viper.GetString("node.address"), true, false, nil)
 	c.Check(err, check.IsNil)
 
 	t.conn = conn
@@ -165,31 +163,4 @@ func (t *NodeTest) TestFarmerOffLine(c *check.C) {
 	c.Check(rspOffLine, check.NotNil)
 	c.Check(rspOffLine.GetError().OK(), check.Equals, true)
 	c.Check(rspOffLine.Account.State, check.Equals, pb.FarmerState_OFFLINE)
-}
-
-func loadConfigure() {
-	// Now set the configuration file
-	viper.SetEnvPrefix(strings.ToUpper("tcsv"))
-	viper.AutomaticEnv()
-	replacer := strings.NewReplacer(".", "_")
-	viper.SetEnvKeyReplacer(replacer)
-
-	viper.SetConfigName("config") // name of config file (without extension)
-
-	alternativeCfgPath := os.Getenv("TCSV_CFG_PATH")
-	if alternativeCfgPath != "" {
-		logger.Info("User defined config file path: %s", alternativeCfgPath)
-		viper.AddConfigPath(alternativeCfgPath)
-	} else {
-		viper.AddConfigPath("./")
-		for _, p := range filepath.SplitList(os.Getenv("GOPATH")) {
-			viper.AddConfigPath(filepath.Join(p, "src/github.com/conseweb/supervisor"))
-		}
-	}
-
-	viper.AddConfigPath("./")   // path to look for the config file in
-	err := viper.ReadInConfig() // Find and read the config file
-	if err != nil {             // Handle errors reading the config file
-		logger.Panicf("Fatal error config file: %s \n", err)
-	}
 }
