@@ -20,13 +20,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/conseweb/supervisor/account/store"
 	pb "github.com/conseweb/common/protos"
+	"github.com/conseweb/common/semaphore"
+	"github.com/conseweb/supervisor/account/store"
+	"github.com/conseweb/supervisor/challenge"
 	"github.com/looplab/fsm"
 	"github.com/op/go-logging"
 	"github.com/spf13/viper"
-	"github.com/conseweb/supervisor/utils/semaphore"
-	"github.com/conseweb/supervisor/challenge"
 )
 
 const (
@@ -256,7 +256,7 @@ func (ctr *FarmerAccountController) checkHandlers() {
 }
 
 func getControllerCheckInterval() time.Duration {
-	if interval, err := time.ParseDuration(viper.GetString("account.check.interval")); err ==nil {
+	if interval, err := time.ParseDuration(viper.GetString("account.check.interval")); err == nil {
 		return interval
 	}
 
