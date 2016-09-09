@@ -16,15 +16,14 @@ limitations under the License.
 package challenge
 
 import (
-	"bytes"
 	"crypto/md5"
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
+	"fmt"
 	pb "github.com/conseweb/common/protos"
 	"golang.org/x/crypto/sha3"
 	"hash"
-	"strings"
 )
 
 func HASH(hashAlgo pb.HashAlgo, p []byte) string {
@@ -57,5 +56,5 @@ func HASH(hashAlgo pb.HashAlgo, p []byte) string {
 
 	h.Write(p)
 
-	return strings.ToLower(bytes.NewBuffer(h.Sum(nil)).String())
+	return fmt.Sprintf("%x", h.Sum(nil))
 }
