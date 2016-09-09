@@ -6,6 +6,12 @@ GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 LD_FLAGS := -X $(PKG)/version.version=$(VERSION) -X $(PKG)/version.gitCommit=$(GIT_COMMIT)
 APP := supervisor
 IMAGE := conseweb/supervisor:$(GIT_BRANCH)
+INNER_GOPATH := /opt/gopath
+
+UNIT_TEST_CONTAINER := supervisor-unittest-$(GIT_COMMIT)
+SV_CONTAINER := supervisor-$(GIT_COMMIT)
+INTE_TEST_CONTAINER := supervisor-testing-$(GIT_COMMIT)
+BUILD_CONTAINER := supervisor-building-$(GIT_COMMIT)
 
 default: unit-test
 
@@ -13,31 +19,31 @@ test: unit-test integration-test clear
 
 unit-test: 
 	docker run --rm \
-	 --name supervisor-testing \
-	 -v $(PWD):/go/src/$(PKG) \
-	 -w /go/src/$(PKG) \
-	 ckeyer/obc:base make testInner
+	 --name $(UNIT_TEST_CONTAINER) \
+	 -v $(PWD):$(INNER_GOPATH)/src/$(PKG) \
+	 -w $(INNER_GOPATH)/src/$(PKG) \
+	 ckeyer/obc:dev make testInner
 
 testInner: 
 	go test -ldflags="$(LD_FLAGS)" $$(go list ./... |grep -v "vendor"|grep -v "integration-tests")
 
 integration-test: clear build-image
-	docker run -d --name supervisor $(IMAGE)
+	docker run -d --name $(SV_CONTAINER) $(IMAGE)
 	docker run --rm \
-	 --name supervisor-testing \
+	 --name $(INTE_TEST_CONTAINER) \
 	 --link supervisor \
 	 -e SUPERVISOR_ADDR="supervisor:9376" \
-	 -v $(PWD):/go/src/$(PKG) \
-	 -w /go/src/$(PKG) \
+	 -v $(PWD):$(INNER_GOPATH)/src/$(PKG) \
+	 -w $(INNER_GOPATH)/src/$(PKG) \
 	 ckeyer/obc:dev tools/integration-test.sh
 	-docker rm -f supervisor
 
 build: 
 	docker run --rm \
-	 --name supervisor-building \
-	 -v $(PWD):/go/src/$(PKG) \
-	 -w /go/src/$(PKG) \
-	 ckeyer/obc:base go build -o bundles/$(APP) -ldflags="$(LD_FLAGS)" .
+	 --name $(BUILD_CONTAINER) \
+	 -v $(PWD):$(INNER_GOPATH)/src/$(PKG) \
+	 -w $(INNER_GOPATH)/src/$(PKG) \
+	 ckeyer/obc:dev go build -o bundles/$(APP) -ldflags="$(LD_FLAGS)" .
 
 build-local:
 	go build -o bundles/$(APP) -ldflags="$(LD_FLAGS)" .
@@ -47,7 +53,8 @@ build-image:
 
 clear:
 	-rm -rf bundles
-	-docker rm -f supervisor-testing
-	-docker rm -f supervisor-building
-	-docker rm -f supervisor
+	-docker rm -f UNIT_TEST_CONTAINER
+	-docker rm -f SV_CONTAINER
+	-docker rm -f INTE_TEST_CONTAINER
+	-docker rm -f BUILD_CONTAINER
 	-docker rmi $(IMAGE)

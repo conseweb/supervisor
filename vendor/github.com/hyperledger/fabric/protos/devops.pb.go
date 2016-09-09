@@ -40,7 +40,6 @@ var BuildResult_StatusCode_value = map[string]int32{
 func (x BuildResult_StatusCode) String() string {
 	return proto.EnumName(BuildResult_StatusCode_name, int32(x))
 }
-func (BuildResult_StatusCode) EnumDescriptor() ([]byte, []int) { return fileDescriptor3, []int{4, 0} }
 
 // Secret is a temporary object to establish security with the Devops.
 // A better solution using certificate will be introduced later
@@ -49,10 +48,9 @@ type Secret struct {
 	EnrollSecret string `protobuf:"bytes,2,opt,name=enrollSecret" json:"enrollSecret,omitempty"`
 }
 
-func (m *Secret) Reset()                    { *m = Secret{} }
-func (m *Secret) String() string            { return proto.CompactTextString(m) }
-func (*Secret) ProtoMessage()               {}
-func (*Secret) Descriptor() ([]byte, []int) { return fileDescriptor3, []int{0} }
+func (m *Secret) Reset()         { *m = Secret{} }
+func (m *Secret) String() string { return proto.CompactTextString(m) }
+func (*Secret) ProtoMessage()    {}
 
 type SigmaInput struct {
 	Secret   *Secret `protobuf:"bytes,1,opt,name=secret" json:"secret,omitempty"`
@@ -60,10 +58,9 @@ type SigmaInput struct {
 	Data     []byte  `protobuf:"bytes,3,opt,name=data,proto3" json:"data,omitempty"`
 }
 
-func (m *SigmaInput) Reset()                    { *m = SigmaInput{} }
-func (m *SigmaInput) String() string            { return proto.CompactTextString(m) }
-func (*SigmaInput) ProtoMessage()               {}
-func (*SigmaInput) Descriptor() ([]byte, []int) { return fileDescriptor3, []int{1} }
+func (m *SigmaInput) Reset()         { *m = SigmaInput{} }
+func (m *SigmaInput) String() string { return proto.CompactTextString(m) }
+func (*SigmaInput) ProtoMessage()    {}
 
 func (m *SigmaInput) GetSecret() *Secret {
 	if m != nil {
@@ -77,10 +74,9 @@ type ExecuteWithBinding struct {
 	Binding                 []byte                   `protobuf:"bytes,2,opt,name=binding,proto3" json:"binding,omitempty"`
 }
 
-func (m *ExecuteWithBinding) Reset()                    { *m = ExecuteWithBinding{} }
-func (m *ExecuteWithBinding) String() string            { return proto.CompactTextString(m) }
-func (*ExecuteWithBinding) ProtoMessage()               {}
-func (*ExecuteWithBinding) Descriptor() ([]byte, []int) { return fileDescriptor3, []int{2} }
+func (m *ExecuteWithBinding) Reset()         { *m = ExecuteWithBinding{} }
+func (m *ExecuteWithBinding) String() string { return proto.CompactTextString(m) }
+func (*ExecuteWithBinding) ProtoMessage()    {}
 
 func (m *ExecuteWithBinding) GetChaincodeInvocationSpec() *ChaincodeInvocationSpec {
 	if m != nil {
@@ -95,10 +91,9 @@ type SigmaOutput struct {
 	Asn1Encoding []byte `protobuf:"bytes,3,opt,name=asn1Encoding,proto3" json:"asn1Encoding,omitempty"`
 }
 
-func (m *SigmaOutput) Reset()                    { *m = SigmaOutput{} }
-func (m *SigmaOutput) String() string            { return proto.CompactTextString(m) }
-func (*SigmaOutput) ProtoMessage()               {}
-func (*SigmaOutput) Descriptor() ([]byte, []int) { return fileDescriptor3, []int{3} }
+func (m *SigmaOutput) Reset()         { *m = SigmaOutput{} }
+func (m *SigmaOutput) String() string { return proto.CompactTextString(m) }
+func (*SigmaOutput) ProtoMessage()    {}
 
 type BuildResult struct {
 	Status         BuildResult_StatusCode   `protobuf:"varint,1,opt,name=status,enum=protos.BuildResult_StatusCode" json:"status,omitempty"`
@@ -106,10 +101,9 @@ type BuildResult struct {
 	DeploymentSpec *ChaincodeDeploymentSpec `protobuf:"bytes,3,opt,name=deploymentSpec" json:"deploymentSpec,omitempty"`
 }
 
-func (m *BuildResult) Reset()                    { *m = BuildResult{} }
-func (m *BuildResult) String() string            { return proto.CompactTextString(m) }
-func (*BuildResult) ProtoMessage()               {}
-func (*BuildResult) Descriptor() ([]byte, []int) { return fileDescriptor3, []int{4} }
+func (m *BuildResult) Reset()         { *m = BuildResult{} }
+func (m *BuildResult) String() string { return proto.CompactTextString(m) }
+func (*BuildResult) ProtoMessage()    {}
 
 func (m *BuildResult) GetDeploymentSpec() *ChaincodeDeploymentSpec {
 	if m != nil {
@@ -122,28 +116,17 @@ type TransactionRequest struct {
 	TransactionUuid string `protobuf:"bytes,1,opt,name=transactionUuid" json:"transactionUuid,omitempty"`
 }
 
-func (m *TransactionRequest) Reset()                    { *m = TransactionRequest{} }
-func (m *TransactionRequest) String() string            { return proto.CompactTextString(m) }
-func (*TransactionRequest) ProtoMessage()               {}
-func (*TransactionRequest) Descriptor() ([]byte, []int) { return fileDescriptor3, []int{5} }
+func (m *TransactionRequest) Reset()         { *m = TransactionRequest{} }
+func (m *TransactionRequest) String() string { return proto.CompactTextString(m) }
+func (*TransactionRequest) ProtoMessage()    {}
 
 func init() {
-	proto.RegisterType((*Secret)(nil), "protos.Secret")
-	proto.RegisterType((*SigmaInput)(nil), "protos.SigmaInput")
-	proto.RegisterType((*ExecuteWithBinding)(nil), "protos.ExecuteWithBinding")
-	proto.RegisterType((*SigmaOutput)(nil), "protos.SigmaOutput")
-	proto.RegisterType((*BuildResult)(nil), "protos.BuildResult")
-	proto.RegisterType((*TransactionRequest)(nil), "protos.TransactionRequest")
 	proto.RegisterEnum("protos.BuildResult_StatusCode", BuildResult_StatusCode_name, BuildResult_StatusCode_value)
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
 var _ grpc.ClientConn
-
-// This is a compile-time assertion to ensure that this generated file
-// is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion3
 
 // Client API for Devops service
 
@@ -286,166 +269,112 @@ func RegisterDevopsServer(s *grpc.Server, srv DevopsServer) {
 	s.RegisterService(&_Devops_serviceDesc, srv)
 }
 
-func _Devops_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Devops_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error) (interface{}, error) {
 	in := new(Secret)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(DevopsServer).Login(ctx, in)
+	out, err := srv.(DevopsServer).Login(ctx, in)
+	if err != nil {
+		return nil, err
 	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/protos.Devops/Login",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DevopsServer).Login(ctx, req.(*Secret))
-	}
-	return interceptor(ctx, in, info, handler)
+	return out, nil
 }
 
-func _Devops_Build_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Devops_Build_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error) (interface{}, error) {
 	in := new(ChaincodeSpec)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(DevopsServer).Build(ctx, in)
+	out, err := srv.(DevopsServer).Build(ctx, in)
+	if err != nil {
+		return nil, err
 	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/protos.Devops/Build",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DevopsServer).Build(ctx, req.(*ChaincodeSpec))
-	}
-	return interceptor(ctx, in, info, handler)
+	return out, nil
 }
 
-func _Devops_Deploy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Devops_Deploy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error) (interface{}, error) {
 	in := new(ChaincodeSpec)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(DevopsServer).Deploy(ctx, in)
+	out, err := srv.(DevopsServer).Deploy(ctx, in)
+	if err != nil {
+		return nil, err
 	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/protos.Devops/Deploy",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DevopsServer).Deploy(ctx, req.(*ChaincodeSpec))
-	}
-	return interceptor(ctx, in, info, handler)
+	return out, nil
 }
 
-func _Devops_Invoke_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Devops_Invoke_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error) (interface{}, error) {
 	in := new(ChaincodeInvocationSpec)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(DevopsServer).Invoke(ctx, in)
+	out, err := srv.(DevopsServer).Invoke(ctx, in)
+	if err != nil {
+		return nil, err
 	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/protos.Devops/Invoke",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DevopsServer).Invoke(ctx, req.(*ChaincodeInvocationSpec))
-	}
-	return interceptor(ctx, in, info, handler)
+	return out, nil
 }
 
-func _Devops_Query_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Devops_Query_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error) (interface{}, error) {
 	in := new(ChaincodeInvocationSpec)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(DevopsServer).Query(ctx, in)
+	out, err := srv.(DevopsServer).Query(ctx, in)
+	if err != nil {
+		return nil, err
 	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/protos.Devops/Query",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DevopsServer).Query(ctx, req.(*ChaincodeInvocationSpec))
-	}
-	return interceptor(ctx, in, info, handler)
+	return out, nil
 }
 
-func _Devops_EXP_GetApplicationTCert_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Devops_EXP_GetApplicationTCert_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error) (interface{}, error) {
 	in := new(Secret)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(DevopsServer).EXP_GetApplicationTCert(ctx, in)
+	out, err := srv.(DevopsServer).EXP_GetApplicationTCert(ctx, in)
+	if err != nil {
+		return nil, err
 	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/protos.Devops/EXP_GetApplicationTCert",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DevopsServer).EXP_GetApplicationTCert(ctx, req.(*Secret))
-	}
-	return interceptor(ctx, in, info, handler)
+	return out, nil
 }
 
-func _Devops_EXP_PrepareForTx_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Devops_EXP_PrepareForTx_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error) (interface{}, error) {
 	in := new(Secret)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(DevopsServer).EXP_PrepareForTx(ctx, in)
+	out, err := srv.(DevopsServer).EXP_PrepareForTx(ctx, in)
+	if err != nil {
+		return nil, err
 	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/protos.Devops/EXP_PrepareForTx",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DevopsServer).EXP_PrepareForTx(ctx, req.(*Secret))
-	}
-	return interceptor(ctx, in, info, handler)
+	return out, nil
 }
 
-func _Devops_EXP_ProduceSigma_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Devops_EXP_ProduceSigma_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error) (interface{}, error) {
 	in := new(SigmaInput)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(DevopsServer).EXP_ProduceSigma(ctx, in)
+	out, err := srv.(DevopsServer).EXP_ProduceSigma(ctx, in)
+	if err != nil {
+		return nil, err
 	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/protos.Devops/EXP_ProduceSigma",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DevopsServer).EXP_ProduceSigma(ctx, req.(*SigmaInput))
-	}
-	return interceptor(ctx, in, info, handler)
+	return out, nil
 }
 
-func _Devops_EXP_ExecuteWithBinding_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Devops_EXP_ExecuteWithBinding_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error) (interface{}, error) {
 	in := new(ExecuteWithBinding)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(DevopsServer).EXP_ExecuteWithBinding(ctx, in)
+	out, err := srv.(DevopsServer).EXP_ExecuteWithBinding(ctx, in)
+	if err != nil {
+		return nil, err
 	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/protos.Devops/EXP_ExecuteWithBinding",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DevopsServer).EXP_ExecuteWithBinding(ctx, req.(*ExecuteWithBinding))
-	}
-	return interceptor(ctx, in, info, handler)
+	return out, nil
 }
 
 var _Devops_serviceDesc = grpc.ServiceDesc{
@@ -489,46 +418,5 @@ var _Devops_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Devops_EXP_ExecuteWithBinding_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: fileDescriptor3,
-}
-
-func init() { proto.RegisterFile("devops.proto", fileDescriptor3) }
-
-var fileDescriptor3 = []byte{
-	// 532 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0xa4, 0x54, 0x5d, 0x6f, 0x12, 0x41,
-	0x14, 0x85, 0x52, 0xa8, 0x5c, 0x28, 0x6c, 0x26, 0x2a, 0x84, 0x87, 0x6a, 0xf6, 0xc9, 0xc4, 0x48,
-	0x14, 0xa3, 0x26, 0xc6, 0x26, 0xf2, 0xb1, 0x28, 0x09, 0xa9, 0x95, 0x85, 0xe8, 0x9b, 0x19, 0x76,
-	0xaf, 0x74, 0xe2, 0x32, 0x33, 0xee, 0xcc, 0x36, 0xed, 0x1f, 0xf3, 0xc1, 0x5f, 0xe7, 0xce, 0x0e,
-	0x1f, 0x6a, 0x31, 0x6d, 0xec, 0xd3, 0xe6, 0x7e, 0x9c, 0x73, 0xcf, 0x99, 0xb9, 0xb3, 0x50, 0x0d,
-	0xf1, 0x5c, 0x48, 0xd5, 0x96, 0xb1, 0xd0, 0x82, 0x94, 0xb2, 0x8f, 0x6a, 0xd5, 0x83, 0x33, 0xca,
-	0x78, 0x20, 0x42, 0xb4, 0x85, 0x56, 0xf5, 0x2b, 0x9d, 0xc7, 0x2c, 0xb0, 0x91, 0xfb, 0x14, 0x4a,
-	0x3e, 0x06, 0x31, 0x6a, 0xe2, 0xc0, 0x1d, 0xe4, 0xb1, 0x88, 0xa2, 0x51, 0xd8, 0xcc, 0x3f, 0xcc,
-	0x3f, 0x2a, 0x93, 0xbb, 0x50, 0xb5, 0x19, 0xdb, 0xd1, 0xdc, 0x33, 0x59, 0x77, 0x0c, 0xe0, 0xb3,
-	0xc5, 0x92, 0x8e, 0xb8, 0x4c, 0x34, 0x39, 0x82, 0x92, 0xb2, 0x55, 0x83, 0xa9, 0x74, 0x6a, 0x96,
-	0x57, 0xb5, 0xb7, 0xac, 0x54, 0xca, 0x69, 0x1f, 0x63, 0x8b, 0xaf, 0x92, 0x2a, 0xec, 0x87, 0x54,
-	0xd3, 0x66, 0xc1, 0x44, 0xee, 0x02, 0x88, 0x77, 0x81, 0x41, 0xa2, 0xf1, 0x13, 0xd3, 0x67, 0x3d,
-	0xc6, 0x43, 0xc6, 0x17, 0xe4, 0x2d, 0x34, 0x36, 0xb2, 0x47, 0xfc, 0x5c, 0x04, 0x54, 0x33, 0xc1,
-	0x7d, 0x89, 0xc1, 0x6a, 0xcc, 0x83, 0xf5, 0x98, 0xfe, 0xee, 0x36, 0x52, 0x87, 0x83, 0xb9, 0x25,
-	0xb3, 0x63, 0xdd, 0x2e, 0x54, 0x32, 0xd9, 0x1f, 0x12, 0x6d, 0x74, 0x1f, 0x42, 0x51, 0x07, 0x46,
-	0x54, 0x3e, 0x13, 0x95, 0x86, 0xca, 0x54, 0x57, 0x1a, 0x53, 0xe7, 0x54, 0xf1, 0x67, 0x9e, 0x61,
-	0x36, 0x14, 0x56, 0xeb, 0xcf, 0x3c, 0x54, 0x7a, 0x09, 0x8b, 0xc2, 0x09, 0xaa, 0x24, 0xd2, 0xa4,
-	0x9d, 0x7a, 0xd7, 0x54, 0x27, 0x2a, 0x23, 0xa9, 0x75, 0x8e, 0xd6, 0xa2, 0x7e, 0x6b, 0x6a, 0xfb,
-	0x59, 0x47, 0x3f, 0x55, 0x48, 0x2a, 0x50, 0x58, 0x2a, 0xab, 0xa7, 0x4c, 0x5e, 0x41, 0x2d, 0x44,
-	0x19, 0x89, 0xcb, 0x25, 0x72, 0x9d, 0x39, 0x2b, 0xfc, 0xc3, 0xd9, 0xe0, 0x8f, 0x36, 0xf7, 0x45,
-	0x7a, 0xfe, 0x5b, 0xce, 0x43, 0x28, 0xcf, 0x4e, 0x06, 0xde, 0x70, 0x74, 0xe2, 0x0d, 0x9c, 0x5c,
-	0x3a, 0xe2, 0xc0, 0x9f, 0xf5, 0xfb, 0x9e, 0xef, 0x3b, 0x79, 0x13, 0x0c, 0xbb, 0xa3, 0xf1, 0x6c,
-	0xe2, 0x39, 0x7b, 0xee, 0x13, 0x20, 0xd3, 0x98, 0x72, 0x45, 0x03, 0x73, 0x46, 0x13, 0xfc, 0x9e,
-	0xa0, 0xd2, 0xa4, 0x01, 0x75, 0xbd, 0xcd, 0xce, 0x12, 0xb6, 0xba, 0xfb, 0xce, 0x8f, 0x7d, 0x28,
-	0x0d, 0xb2, 0x7d, 0x22, 0x8f, 0xa1, 0x38, 0x16, 0x0b, 0xc6, 0xc9, 0x5f, 0x77, 0xdb, 0x72, 0xd6,
-	0x71, 0x6a, 0x55, 0x0a, 0xae, 0xd0, 0xcd, 0x91, 0x2e, 0x14, 0x33, 0xf7, 0xe4, 0xde, 0x15, 0x1f,
-	0x46, 0x7d, 0xeb, 0x5a, 0x7b, 0x39, 0xd2, 0x33, 0x93, 0x4d, 0xee, 0x16, 0x1c, 0xc7, 0x50, 0x32,
-	0x0b, 0xf1, 0x0d, 0xc9, 0x75, 0x9b, 0xb2, 0xd3, 0xc5, 0x1b, 0x28, 0x7e, 0x4c, 0x30, 0xbe, 0xfc,
-	0x3f, 0xf4, 0x31, 0x34, 0xbc, 0xcf, 0xa7, 0x5f, 0xde, 0xa1, 0xee, 0x4a, 0x19, 0x31, 0xdb, 0x9d,
-	0x3d, 0x81, 0x1b, 0x1d, 0xe1, 0x4b, 0x70, 0x0c, 0xfc, 0x34, 0x46, 0x49, 0x63, 0x1c, 0x8a, 0x78,
-	0x7a, 0x71, 0x23, 0xdc, 0xeb, 0x35, 0x4e, 0x84, 0x49, 0x80, 0xd9, 0xb2, 0x13, 0xb2, 0xc1, 0x6d,
-	0x9e, 0xec, 0x4e, 0xec, 0x7b, 0xb8, 0x6f, 0xb0, 0x3b, 0x9e, 0x62, 0x6b, 0xdd, 0x7d, 0xb5, 0xb6,
-	0x8b, 0x69, 0x6e, 0xff, 0x3b, 0xcf, 0x7f, 0x05, 0x00, 0x00, 0xff, 0xff, 0x9d, 0xbf, 0xed, 0xd2,
-	0x8e, 0x04, 0x00, 0x00,
+	Streams: []grpc.StreamDesc{},
 }
