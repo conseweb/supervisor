@@ -80,7 +80,8 @@ func StartNode() {
 
 // stop node
 func StopNode() {
-	server.GracefulStop()
+	// server.GracefulStop()
+	server.Stop()
 	account.Close()
 	challenge.GetFarmerChallengeReqCache().Close()
 	challenge.GetBlocksHashCache().Close()
@@ -108,7 +109,7 @@ func HandleNodeSignal() {
 }
 
 // InitTLSForServer returns TLS credentials for node
-func initTLSForServer() credentials.TransportCredentials {
+func initTLSForServer() credentials.TransportAuthenticator {
 	creds, err := credentials.NewServerTLSFromFile(viper.GetString("node.tls.cert.file"), viper.GetString("node.tls.key.file"))
 	if err != nil {
 		logger.Errorf("Failed to create TLS credentials %v", err)
