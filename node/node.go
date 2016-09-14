@@ -1,5 +1,6 @@
 /*
 Copyright Mojing Inc. 2016 All Rights Reserved.
+Written by mint.zhao.chiu@gmail.com. github.com: https://www.github.com/mintzhao
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,11 +18,9 @@ package node
 
 import (
 	"net"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/conseweb/common/clientconn"
+	"github.com/conseweb/common/exec"
 	pb "github.com/conseweb/common/protos"
 	"github.com/conseweb/supervisor/account"
 	"github.com/conseweb/supervisor/api"
@@ -75,37 +74,20 @@ func StartNode() {
 	go server.Serve(lis)
 	logger.Infof("supervisor node listening on %s, waiting for connect...", addr)
 
-	HandleNodeSignal()
+	exec.HandleSignal(StopNode)
 }
 
 // stop node
-func StopNode() {
+func StopNode() error {
 	// server.GracefulStop()
-	server.Stop()
+	if server != nil {
+		server.Stop()
+	}
 	account.Close()
 	challenge.GetFarmerChallengeReqCache().Close()
 	challenge.GetBlocksHashCache().Close()
-}
 
-func HandleNodeSignal() {
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
-	logger.Infof("supervisor node has registered signal notify")
-
-	for {
-		s := <-sigs
-		logger.Infof("supervisor node has received signal: %v", s)
-
-		switch s {
-		case syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT:
-			logger.Info("supervisor node is graceful shutting down...")
-
-			StopNode()
-
-			logger.Info("supervisor node has exited")
-			os.Exit(0)
-		}
-	}
+	return nil
 }
 
 // InitTLSForServer returns TLS credentials for node

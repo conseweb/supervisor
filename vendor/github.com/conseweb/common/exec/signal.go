@@ -14,34 +14,30 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package semaphore
+package exec
 
-type Semaphore struct {
-	bufSize int
-	channel chan int8
-}
+import (
+	"os"
+	"os/signal"
+	"syscall"
+)
 
-func NewSemaphore(concurrencyNum int) *Semaphore {
-	return &Semaphore{channel: make(chan int8, concurrencyNum), bufSize: concurrencyNum}
-}
+type SignalExecuter func() error
 
-func (this *Semaphore) TryAcquire() bool {
-	select {
-	case this.channel <- int8(0):
-		return true
-	default:
-		return false
+func HandleSignal(fs ...SignalExecuter) {
+	sigChan := make(chan os.Signal)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+
+	for {
+		s := <-sigChan
+
+		switch s {
+		case syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT:
+			for _, f := range fs {
+				f()
+			}
+
+			os.Exit(0)
+		}
 	}
-}
-
-func (this *Semaphore) Acquire() {
-	this.channel <- int8(0)
-}
-
-func (this *Semaphore) Release() {
-	<-this.channel
-}
-
-func (this *Semaphore) AvailablePermits() int {
-	return this.bufSize - len(this.channel)
 }
